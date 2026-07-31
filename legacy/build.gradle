@@ -1,0 +1,59 @@
+plugins {
+    id "architectury-plugin" version "3.4.164"
+    id "dev.architectury.loom" version "1.13.469" apply false
+    id "com.gradleup.shadow" version "8.3.6" apply false
+}
+
+architectury {
+    minecraft = rootProject.minecraft_version
+}
+
+subprojects {
+    apply plugin: "dev.architectury.loom"
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings loom.officialMojangMappings()
+    }
+}
+
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+
+    base {
+        archivesName = rootProject.archives_base_name + "-" + project.name
+    }
+
+    version = rootProject.mod_version
+    group = rootProject.maven_group
+
+    repositories {
+        mavenCentral()
+        maven { url "https://maven.minecraftforge.net/" }
+        maven { url "https://repo.sleeping.town/" }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+        options.release = 16
+    }
+
+    java {
+        withSourcesJar()
+    }
+}
+
+tasks.register("releaseJars") {
+    group = "build"
+    description = "Build the Java 16 Fabric/Quilt and Forge legacy17 JARs."
+    dependsOn(
+            ":common:test",
+            ":fabric:remapJar",
+            ":forge:remapJar"
+    )
+}

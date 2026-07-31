@@ -1,0 +1,71 @@
+plugins {
+    id "com.gradleup.shadow"
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+sourceSets.main {
+    java.srcDir("../../fabric/src/main/java")
+    java.exclude("link/e4steam/fabric/E4steamClientFabric.java")
+}
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "unstubbedJar")) { transitive false }
+
+    include "folk.sisby:kaleido-config:0.3.3+1.3.2"
+    shadowCommon("com.code-disaster.steamworks4j:steamworks4j:${rootProject.steamworks4j_version}") {
+        transitive = false
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+shadowJar {
+    exclude("architectury.common.json")
+    exclude("steam_api.dll")
+    exclude("steamworks4j.dll")
+    exclude("libsteam_api.dylib")
+    exclude("libsteamworks4j.dylib")
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier = "dev-shadow"
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier = "legacy17"
+}
+
+sourcesJar {
+    archiveClassifier = "sources-legacy17"
+    def commonSources = project(":common").unstubbedSourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}

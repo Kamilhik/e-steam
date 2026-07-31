@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "*"
+license = "MIT"
+
+[[mods]]
+modId = "e4steam"
+version = "${version}"
+displayName = "e4steam"
+displayTest = "IGNORE_ALL_VERSION"
+authors = "Kamilchik"
+description = '''
+Share an integrated Minecraft LAN world through Steam P2P and Valve relays.
+Experimental App ID 480 test build; both players need the mod and Steam.
+Created by Kamilchik.
+'''
+
+[[dependencies.e4steam]]
+modId = "forge"
+mandatory = true
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.e4steam]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.17.1,1.18.2)"
+ordering = "NONE"
+side = "BOTH"

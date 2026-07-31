@@ -1,0 +1,254 @@
+plugins {
+    id "architectury-plugin" version "3.4.164"
+    id "dev.architectury.loom" version "1.13.469" apply false
+    id 'com.gradleup.shadow' version '8.3.6' apply false
+}
+
+architectury {
+    minecraft = rootProject.minecraft_version
+}
+
+subprojects {
+    apply plugin: "dev.architectury.loom"
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        // The following line declares the mojmap mappings, you may use other mappings as well
+        mappings loom.officialMojangMappings()
+        // The following line declares the yarn mappings you may select this one as well.
+        // mappings "net.fabricmc:yarn:1.18.2+build.4:v2"
+    }
+}
+
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    base {
+        archivesName = rootProject.archives_base_name + "-" + project.name
+    }
+
+    version = rootProject.mod_version
+    group = rootProject.maven_group
+
+    repositories {
+        // Add repositories to retrieve artifacts from in here.
+        // You should only use this when depending on other mods because
+        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+        // for more information about repositories.
+        mavenCentral()
+        maven { url "https://maven.neoforged.net/releases/" }
+        maven { url 'https://repo.sleeping.town/' }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+        options.release = 17
+    }
+
+    java {
+        withSourcesJar()
+    }
+}
+
+ext.getLatestChangelog = {
+    Collection<String> lines = file("$rootDir/CHANGELOG.md").readLines()
+    String changelog = ""
+    Boolean atSegment = false
+    for (String line : lines) {
+        if (line.startsWith("## ")) {
+            if (atSegment) break // hit next segment
+            atSegment = true
+        }
+        if (atSegment) changelog += "$line\n"
+    }
+    return changelog.trim()
+}
+
+tasks.register("viewLatestChangelog") {
+    group "documentation"
+    description "Print the topmost single version section from the full CHANGELOG.md file."
+    doLast {
+        println(getLatestChangelog())
+    }
+}
+
+tasks.register("legacyReleaseJars", GradleBuild) {
+    group = "build"
+    description = "Build the separate Minecraft 1.17/Java 16 legacy variants."
+    dir = file("legacy")
+    tasks = ["clean", "releaseJars"]
+}
+
+tasks.register("releaseJars") {
+    group = "build"
+    description = "Build and test all six public runtime JAR variants."
+    dependsOn(
+            legacyReleaseJars,
+            ":common:test",
+            ":fabric:remapJar",
+            ":fabric:modernRemapJar",
+            ":forge:remapJar",
+            ":neoforge:remapJar"
+    )
+
+    doLast {
+        def version = rootProject.mod_version
+        def variants = [
+                [
+                        label: "Fabric/Quilt legacy17",
+                        file: file("legacy/fabric/build/libs/e4steam-fabric-${version}-legacy17.jar"),
+                        major: 60,
+                        metadata: ["fabric.mod.json": [
+                                '"id": "e4steam"',
+                                '"minecraft": ">=1.17 <1.18"',
+                                '"java": ">=16"'
+                        ]]
+                ],
+                [
+                        label: "Forge legacy17",
+                        file: file("legacy/forge/build/libs/e4steam-forge-${version}-legacy17.jar"),
+                        major: 60,
+                        metadata: ["META-INF/mods.toml": [
+                                'modId = "e4steam"',
+                                'versionRange = "[1.17.1,1.18.2)"'
+                        ]]
+                ],
+                [
+                        label: "Fabric/Quilt",
+                        file: file("fabric/build/libs/e4steam-fabric-${version}.jar"),
+                        major: 61,
+                        metadata: ["fabric.mod.json": [
+                                '"id": "e4steam"',
+                                '"minecraft": ">=1.18 <26.1-"',
+                                '"java": ">=17"'
+                        ]]
+                ],
+                [
+                        label: "Fabric/Quilt Modern",
+                        file: file("fabric/build/libs/e4steam-fabric-${version}-modern.jar"),
+                        major: 61,
+                        metadata: ["fabric.mod.json": [
+                                '"id": "e4steam"',
+                                '"minecraft": ">=26.1- <26.3-"',
+                                '"java": ">=25"'
+                        ]]
+                ],
+                [
+                        label: "Forge",
+                        file: file("forge/build/libs/e4steam-forge-${version}.jar"),
+                        major: 61,
+                        metadata: ["META-INF/mods.toml": [
+                                'modId = "e4steam"',
+                                'versionRange = "[1.18.2,1.20.3)"'
+                        ]]
+                ],
+                [
+                        label: "NeoForge",
+                        file: file("neoforge/build/libs/e4steam-neoforge-${version}.jar"),
+                        major: 61,
+                        metadata: [
+                                "META-INF/mods.toml": [
+                                        'modId = "e4steam"',
+                                        'versionRange = "[1.20.2,26.3)"'
+                                ],
+                                "META-INF/neoforge.mods.toml": [
+                                        'modId = "e4steam"',
+                                        'versionRange = "[1.20.2,26.3)"'
+                                ]
+                        ]
+                ]
+        ]
+        def requiredNatives = [
+                "steam_api64.dll",
+                "steamworks4j64.dll",
+                "libsteam_api.so",
+                "libsteamworks4j.so"
+        ]
+        def forbiddenNatives = [
+                "steam_api.dll",
+                "steamworks4j.dll",
+                "libsteam_api.dylib",
+                "libsteamworks4j.dylib"
+        ]
+
+        variants.each { variant ->
+            File jarFile = variant.file
+            if (!jarFile.isFile()) {
+                throw new GradleException("Missing ${variant.label} runtime JAR: ${jarFile}")
+            }
+
+            def zip = new java.util.zip.ZipFile(jarFile)
+            try {
+                requiredNatives.each { name ->
+                    if (zip.getEntry(name) == null) {
+                        throw new GradleException("${variant.label} is missing bundled native ${name}")
+                    }
+                }
+                forbiddenNatives.each { name ->
+                    if (zip.getEntry(name) != null) {
+                        throw new GradleException("${variant.label} unexpectedly bundles ${name}")
+                    }
+                }
+                if (zip.getEntry("steam_appid.txt") != null) {
+                    throw new GradleException("${variant.label} must not package steam_appid.txt")
+                }
+                if (zip.getEntry("META-INF/LICENSE-e4steam.txt") == null
+                        || zip.getEntry("META-INF/THIRD_PARTY_NOTICES.md") == null) {
+                    throw new GradleException("${variant.label} is missing packaged legal notices")
+                }
+                if (zip.getEntry("e4steam.mixins.json") == null) {
+                    throw new GradleException("${variant.label} is missing e4steam.mixins.json")
+                }
+
+                def classEntry = zip.getEntry("link/e4steam/steam/SteamAddress.class")
+                if (classEntry == null) {
+                    throw new GradleException("${variant.label} is missing SteamAddress.class")
+                }
+                def stream = new DataInputStream(zip.getInputStream(classEntry))
+                try {
+                    long classMagic = Integer.toUnsignedLong(stream.readInt())
+                    if (classMagic != 3405691582L) {
+                        throw new GradleException("${variant.label} contains an invalid class file")
+                    }
+                    stream.readUnsignedShort()
+                    int major = stream.readUnsignedShort()
+                    if (major != variant.major) {
+                        throw new GradleException(
+                                "${variant.label} classfile major is ${major}; expected ${variant.major}"
+                        )
+                    }
+                } finally {
+                    stream.close()
+                }
+
+                variant.metadata.each { path, expectedFragments ->
+                    def entry = zip.getEntry(path)
+                    if (entry == null) {
+                        throw new GradleException("${variant.label} is missing ${path}")
+                    }
+                    String text = zip.getInputStream(entry).getText("UTF-8")
+                    String unicodeEscape = Character.toString((char) 92) + "u"
+                    text = text
+                            .replace(unicodeEscape + "003e", ">")
+                            .replace(unicodeEscape + "003d", "=")
+                            .replace(unicodeEscape + "003c", "<")
+                    expectedFragments.each { fragment ->
+                        if (!text.contains(fragment)) {
+                            throw new GradleException(
+                                    "${variant.label} ${path} is missing expected range ${fragment}"
+                            )
+                        }
+                    }
+                }
+            } finally {
+                zip.close()
+            }
+        }
+        println("Artifact audit passed for all six runtime JAR variants.")
+    }
+}

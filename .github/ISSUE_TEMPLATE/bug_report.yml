@@ -1,0 +1,98 @@
+name: Bug report
+description: Report a reproducible problem without exposing private connection data
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste a complete join address, Steam session details, account
+        identifiers, or an unreviewed log. Report security issues privately
+        through GitHub's vulnerability-reporting feature.
+  - type: input
+    id: mod-version
+    attributes:
+      label: Mod version
+      placeholder: 0.x.y-alpha.z
+    validations:
+      required: true
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft version
+      placeholder: 1.20.2
+    validations:
+      required: true
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Loader
+      options:
+        - Fabric
+        - Forge
+        - NeoForge
+        - Quilt
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: loader-version
+    attributes:
+      label: Loader version
+    validations:
+      required: true
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system and architecture
+      placeholder: Windows 11 x64
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Where did the problem occur?
+      options:
+        - Host
+        - Guest
+        - Both
+        - Before hosting or joining
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed result and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Start Steam...
+        2. Start Minecraft...
+        3. Open...
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics
+      description: |
+        Paste only reviewed diagnostics. Remove join addresses, tokens, account
+        identifiers, local paths, and other private data.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: Both players use the same mod release and a compatible game/loader combination.
+          required: true
+        - label: I removed complete join addresses, tokens, and private Steam data.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

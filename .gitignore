@@ -1,0 +1,49 @@
+build/
+*.ipr
+run/
+*.iws
+out/
+*.iml
+.gradle/
+.gradle-user/
+output/
+bin/
+libs/
+
+.classpath
+.project
+.idea/
+.agents/
+.codex/
+classes/
+.metadata
+.vscode
+.settings
+*.launch
+
+# Local operating-system, JVM, and game diagnostics.
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+*.hprof
+hs_err_pid*.log
+replay_pid*.log
+crash-reports/
+logs/
+
+# Local credentials and signing material must never enter the repository.
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+
+# Steamworks writes development App ID files next to launched games.
+# Keep only the repository-root test fixture under version control.
+**/steam_appid.txt
+!/steam_appid.txt

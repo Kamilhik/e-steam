@@ -1,0 +1,63 @@
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+dependencies {
+    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
+    // Do NOT use other classes from fabric loader
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    implementation 'folk.sisby:kaleido-config:0.3.3+1.3.2'
+    implementation("com.code-disaster.steamworks4j:steamworks4j:${rootProject.steamworks4j_version}") {
+        transitive = false
+    }
+    testImplementation platform("org.junit:junit-bom:5.10.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+processResources {
+    from(rootProject.file("LICENSE")) {
+        into "META-INF"
+        rename { "LICENSE-e4steam.txt" }
+    }
+    from(rootProject.file("THIRD_PARTY_NOTICES.md")) {
+        into "META-INF"
+    }
+}
+
+sourcesJar {
+    from(rootProject.file("LICENSE")) {
+        into "META-INF"
+        rename { "LICENSE-e4steam.txt" }
+    }
+    from(rootProject.file("THIRD_PARTY_NOTICES.md")) {
+        into "META-INF"
+    }
+}
+
+configurations {
+    consumable("unstubbedJar")
+}
+
+tasks.register('unstubbedJar', Jar) {
+    archiveClassifier = 'unstubbed'
+
+    from zipTree(jar.archiveFile)
+    exclude("link/e4steam/Agnos.class")
+}
+
+tasks.register('unstubbedSourcesJar', Jar) {
+    archiveClassifier = 'unstubbed-sources'
+    dependsOn sourcesJar
+
+    from sourcesJar.archiveFile.map { zipTree(it) }
+    exclude("link/e4steam/Agnos.java")
+}
+
+artifacts {
+    add("unstubbedJar", unstubbedJar)
+}
