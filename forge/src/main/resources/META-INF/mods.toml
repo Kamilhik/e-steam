@@ -6,6 +6,7 @@ license = "MIT"
 modId = "e4steam"
 version = "${version}"
 displayName = "e4steam"
+logoFile = "assets/e4steam_minecraft/icon.png"
 displayTest = "IGNORE_ALL_VERSION"
 authors = "Kamilchik"
 description = '''

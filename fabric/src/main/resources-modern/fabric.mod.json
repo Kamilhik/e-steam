@@ -8,6 +8,7 @@
     "Kamilchik"
   ],
   "license": "MIT",
+  "icon": "assets/e4steam_minecraft/icon.png",
   "environment": "client",
   "entrypoints": {
     "main": [

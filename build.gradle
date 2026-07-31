@@ -105,6 +105,7 @@ tasks.register("releaseJars") {
                         major: 60,
                         metadata: ["fabric.mod.json": [
                                 '"id": "e4steam"',
+                                '"icon": "assets/e4steam_minecraft/icon.png"',
                                 '"minecraft": ">=1.17 <1.18"',
                                 '"java": ">=16"'
                         ]]
@@ -115,6 +116,7 @@ tasks.register("releaseJars") {
                         major: 60,
                         metadata: ["META-INF/mods.toml": [
                                 'modId = "e4steam"',
+                                'logoFile = "assets/e4steam_minecraft/icon.png"',
                                 'versionRange = "[1.17.1,1.18.2)"'
                         ]]
                 ],
@@ -124,6 +126,7 @@ tasks.register("releaseJars") {
                         major: 61,
                         metadata: ["fabric.mod.json": [
                                 '"id": "e4steam"',
+                                '"icon": "assets/e4steam_minecraft/icon.png"',
                                 '"minecraft": ">=1.18 <26.1-"',
                                 '"java": ">=17"'
                         ]]
@@ -134,6 +137,7 @@ tasks.register("releaseJars") {
                         major: 61,
                         metadata: ["fabric.mod.json": [
                                 '"id": "e4steam"',
+                                '"icon": "assets/e4steam_minecraft/icon.png"',
                                 '"minecraft": ">=26.1- <26.3-"',
                                 '"java": ">=25"'
                         ]]
@@ -144,6 +148,7 @@ tasks.register("releaseJars") {
                         major: 61,
                         metadata: ["META-INF/mods.toml": [
                                 'modId = "e4steam"',
+                                'logoFile = "assets/e4steam_minecraft/icon.png"',
                                 'versionRange = "[1.18.2,1.20.3)"'
                         ]]
                 ],
@@ -154,10 +159,12 @@ tasks.register("releaseJars") {
                         metadata: [
                                 "META-INF/mods.toml": [
                                         'modId = "e4steam"',
+                                        'logoFile = "assets/e4steam_minecraft/icon.png"',
                                         'versionRange = "[1.20.2,26.3)"'
                                 ],
                                 "META-INF/neoforge.mods.toml": [
                                         'modId = "e4steam"',
+                                        'logoFile = "assets/e4steam_minecraft/icon.png"',
                                         'versionRange = "[1.20.2,26.3)"'
                                 ]
                         ]
@@ -203,6 +210,9 @@ tasks.register("releaseJars") {
                 }
                 if (zip.getEntry("e4steam.mixins.json") == null) {
                     throw new GradleException("${variant.label} is missing e4steam.mixins.json")
+                }
+                if (zip.getEntry("assets/e4steam_minecraft/icon.png") == null) {
+                    throw new GradleException("${variant.label} is missing the e4steam mod icon")
                 }
 
                 def classEntry = zip.getEntry("link/e4steam/steam/SteamAddress.class")
