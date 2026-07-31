@@ -17,13 +17,13 @@ Both players must install the same e4steam build and use a compatible Minecraft 
 
 ## Compatibility
 
-The `0.2.0-alpha.1` source tree builds six runtime JAR variants:
+The `0.2.0-alpha.2` source tree builds six runtime JAR variants:
 
 | Runtime JAR | Loader | Declared Minecraft range |
 | --- | --- | --- |
-| `e4steam-fabric-<version>-legacy17.jar` | Fabric; also intended for Quilt | 1.17.x |
+| `e4steam-fabric-<version>-mc1.17-1.18.2.jar` | Fabric; also intended for Quilt | 1.17–1.18.2 |
 | `e4steam-forge-<version>-legacy17.jar` | Forge | 1.17.1–1.18.1 |
-| `e4steam-fabric-<version>.jar` | Fabric; also intended for Quilt | 1.18–1.21.11 |
+| `e4steam-fabric-<version>.jar` | Fabric; also intended for Quilt | 1.19–1.21.11 |
 | `e4steam-fabric-<version>-modern.jar` | Fabric; also intended for Quilt | 26.1–26.2 |
 | `e4steam-forge-<version>.jar` | Forge | 1.18.2–1.20.2 |
 | `e4steam-neoforge-<version>.jar` | NeoForge | 1.20.2–26.2 |
@@ -124,9 +124,9 @@ e4steam — экспериментальный отдельный форк e4mc,
 
 Каждое подключение проверяет случайный 128-битный токен и прямую дружбу гостя с хостом в Steam. В режиме друзей статус **«Присоединиться к игре»** видят друзья, а скопированный адрес работает как запасной способ. Закрытый режим дополнительно требует участия гостя в текущем приватном лобби, поэтому пересланный адрес не обходит приглашение. Полный адрес всё равно следует считать секретным. Форк использует собственный идентификатор мода `e4steam`. Обычный LAN-порт Minecraft по-прежнему доступен в вашей локальной сети согласно правилам фаервола.
 
-В исходниках `0.2.0-alpha.1` собираются шесть вариантов: отдельные
-экспериментальные Fabric/Quilt Legacy 17 для 1.17.x и Forge Legacy 17 для
-1.17.1–1.18.1, Fabric/Quilt для 1.18–1.21.11, Fabric/Quilt Modern для
+В исходниках `0.2.0-alpha.2` собираются шесть вариантов: отдельные
+экспериментальные Fabric/Quilt для 1.17–1.18.2 и Forge Legacy 17 для
+1.17.1–1.18.1, Fabric/Quilt для 1.19–1.21.11, Fabric/Quilt Modern для
 26.1–26.2, Forge для 1.18.2–1.20.2 и NeoForge для 1.20.2–26.2. Для двух
 Legacy вариантов достаточно Java 16. Переходная 1.20.2 поддерживает как Forge,
 так и NeoForge; после неё используется NeoForge. Пока полноценно проверена

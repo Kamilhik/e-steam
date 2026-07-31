@@ -25,6 +25,15 @@ import java.util.function.Consumer;
  * descriptors lets the same classes load on older Minecraft releases.</p>
  */
 public final class MinecraftUiCompat {
+    private static final String[] MESSAGE_SCREEN_CLASS_NAMES = {
+            // Mojang mappings through 1.20.6.
+            "net.minecraft.client.gui.screens.GenericDirtMessageScreen",
+            // Mojang mappings from 1.21 onward.
+            "net.minecraft.client.gui.screens.GenericMessageScreen",
+            // Stable Fabric intermediary name used across both eras.
+            "net.minecraft.class_424"
+    };
+
     private static final String[] DISCONNECT_METHOD_NAMES = {
             "disconnect",
             "clearLevel",
@@ -84,6 +93,37 @@ public final class MinecraftUiCompat {
             }
             return;
         }
+    }
+
+    /**
+     * Creates Minecraft's generic progress/message screen without linking the
+     * caller to the Mojang class name that changed in 1.21.
+     */
+    public static Screen messageScreen(Component message, Screen fallback) {
+        for (String className : MESSAGE_SCREEN_CLASS_NAMES) {
+            try {
+                Class<?> screenType = Class.forName(className, false, Screen.class.getClassLoader());
+                if (!Screen.class.isAssignableFrom(screenType)) {
+                    continue;
+                }
+                for (Constructor<?> constructor : screenType.getDeclaredConstructors()) {
+                    Class<?>[] parameterTypes = constructor.getParameterTypes();
+                    if (parameterTypes.length != 1
+                            || !parameterTypes[0].isAssignableFrom(message.getClass())) {
+                        continue;
+                    }
+                    constructor.setAccessible(true);
+                    return (Screen) constructor.newInstance(message);
+                }
+            } catch (ClassNotFoundException ignored) {
+                // Try the next mapping/runtime name.
+            } catch (ReflectiveOperationException | RuntimeException failure) {
+                // A progress screen is cosmetic. Keep joining via the previous
+                // screen if this Minecraft version changes its constructor.
+                break;
+            }
+        }
+        return fallback;
     }
 
     /**

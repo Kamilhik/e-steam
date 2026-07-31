@@ -54,11 +54,11 @@ remapJar {
     injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    archiveClassifier = "legacy17"
+    archiveClassifier = "mc1.17-1.18.2"
 }
 
 sourcesJar {
-    archiveClassifier = "sources-legacy17"
+    archiveClassifier = "sources-mc1.17-1.18.2"
     def commonSources = project(":common").unstubbedSourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }

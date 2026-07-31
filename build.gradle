@@ -100,13 +100,13 @@ tasks.register("releaseJars") {
         def version = rootProject.mod_version
         def variants = [
                 [
-                        label: "Fabric/Quilt legacy17",
-                        file: file("legacy/fabric/build/libs/e4steam-fabric-${version}-legacy17.jar"),
+                        label: "Fabric/Quilt 1.17-1.18.2",
+                        file: file("legacy/fabric/build/libs/e4steam-fabric-${version}-mc1.17-1.18.2.jar"),
                         major: 60,
                         metadata: ["fabric.mod.json": [
                                 '"id": "e4steam"',
                                 '"icon": "assets/e4steam_minecraft/icon.png"',
-                                '"minecraft": ">=1.17 <1.18"',
+                                '"minecraft": ">=1.17 <1.19"',
                                 '"java": ">=16"'
                         ]]
                 ],
@@ -127,7 +127,7 @@ tasks.register("releaseJars") {
                         metadata: ["fabric.mod.json": [
                                 '"id": "e4steam"',
                                 '"icon": "assets/e4steam_minecraft/icon.png"',
-                                '"minecraft": ">=1.18 <26.1-"',
+                                '"minecraft": ">=1.19 <26.1-"',
                                 '"java": ">=17"'
                         ]]
                 ],
@@ -234,6 +234,20 @@ tasks.register("releaseJars") {
                     }
                 } finally {
                     stream.close()
+                }
+
+                def clientEntry = zip.getEntry("link/e4steam/E4steamClient.class")
+                if (clientEntry == null) {
+                    throw new GradleException("${variant.label} is missing E4steamClient.class")
+                }
+                String clientConstants = new String(
+                        zip.getInputStream(clientEntry).readAllBytes(),
+                        java.nio.charset.StandardCharsets.ISO_8859_1
+                )
+                if (clientConstants.contains("net/minecraft/client/gui/screens/GenericDirtMessageScreen")) {
+                    throw new GradleException(
+                            "${variant.label} directly links the pre-1.21 GenericDirtMessageScreen class"
+                    )
                 }
 
                 variant.metadata.each { path, expectedFragments ->

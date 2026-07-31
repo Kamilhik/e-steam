@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -217,8 +216,9 @@ public class E4steamClient {
                 }
 
                 Screen returnScreen = multiplayerScreen();
-                minecraft.setScreen(new GenericDirtMessageScreen(
-                        Mirror.translatable("connect.connecting")
+                minecraft.setScreen(MinecraftUiCompat.messageScreen(
+                        Mirror.translatable("connect.connecting"),
+                        previousScreen
                 ));
                 claimSteamInviteAndConnect(
                         minecraft,

@@ -21,7 +21,7 @@
   "depends": {
     "fabric": "*",
     "fabric-api": "*",
-    "minecraft": ">=1.18 <26.1-",
+    "minecraft": ">=1.19 <26.1-",
     "java": ">=17"
   },
   "provides": [

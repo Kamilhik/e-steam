@@ -3,7 +3,15 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
-## 0.2.0-alpha.1 - Unreleased
+## 0.2.0-alpha.2 - Unreleased
+
+- Removed the direct pre-1.21 `GenericDirtMessageScreen` link and select the
+  renamed 1.21+ `GenericMessageScreen` through the compatibility boundary.
+- Corrected Fabric compatibility: the Command API v1 build now covers
+  Minecraft 1.17–1.18.2, while the Command API v2 build starts at 1.19.
+- Added an artifact audit that rejects a direct link to the renamed screen.
+
+## 0.2.0-alpha.1 - 2026-07-31
 
 - Renamed the separate project, mod ID, Java namespace, commands, and release
   artifacts to **e4steam**.

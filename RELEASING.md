@@ -2,7 +2,7 @@
 
 ## Current gate
 
-`0.2.0-alpha.1` is an unreleased development build. Do not upload its binary
+`0.2.0-alpha.2` is an unreleased development build. Do not upload its binary
 JARs to Modrinth or attach them to a public GitHub release until every
 loader/version combination below has passed a clean-instance smoke test, the
 publisher has personally accepted the applicable Steamworks terms, and Valve
@@ -35,9 +35,9 @@ Create six files under one Modrinth project:
 
 | File | Loader metadata | Game versions | Required dependency |
 | --- | --- | --- | --- |
-| `e4steam-fabric-<version>-legacy17.jar` | Fabric and Quilt | 1.17.x | Fabric API |
+| `e4steam-fabric-<version>-mc1.17-1.18.2.jar` | Fabric and Quilt | 1.17-1.18.2 | Fabric API |
 | `e4steam-forge-<version>-legacy17.jar` | Forge | 1.17.1–1.18.1 | None |
-| `e4steam-fabric-<version>.jar` | Fabric and Quilt | 1.18–1.21.11 | Fabric API |
+| `e4steam-fabric-<version>.jar` | Fabric and Quilt | 1.19-1.21.11 | Fabric API |
 | `e4steam-fabric-<version>-modern.jar` | Fabric and Quilt | 26.1–26.2 | Fabric API |
 | `e4steam-forge-<version>.jar` | Forge | 1.18.2–1.20.2 | None |
 | `e4steam-neoforge-<version>.jar` | NeoForge | 1.20.2–26.2 | None |
@@ -58,7 +58,7 @@ declared ranges into public release metadata:
 | Minecraft | Required loader checks |
 | --- | --- |
 | 1.17 and 1.17.1 | Fabric/Quilt legacy on both; Forge legacy on 1.17.1 |
-| 1.18 and 1.18.2 | Fabric/Quilt standard; Forge legacy on 1.18.1 and standard on 1.18.2 |
+| 1.18, 1.18.1, and 1.18.2 | Fabric/Quilt legacy on all three; Forge legacy on 1.18 and 1.18.1, then standard on 1.18.2 |
 | 1.19.2 and 1.19.4 | Fabric, Quilt, Forge |
 | 1.20.2 | Fabric, Quilt, Forge, NeoForge |
 | 1.20.5 | Fabric, Quilt, NeoForge |
