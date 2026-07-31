@@ -95,30 +95,6 @@ process retains the temporary mapping after a build.
 
 The tracked root `steam_appid.txt` contains only `480` for local development and is not packed into the mod JAR. At first Steam initialization the mod creates the same file in Minecraft's working/game directory if it is missing; that file persists after exit. The mod refuses to overwrite a different App ID and verifies after initialization that Steam actually assigned App ID 480. If you stop using all Steam-integrated mods, you may remove the generated file while Minecraft is closed. Runtime copies in nested game directories are ignored by Git.
 
-## Publishing the source on GitHub
-
-Publishing this source repository is separate from distributing compiled JARs. Replace the placeholder Git identity first, review the staged snapshot, and then create the public repository with [GitHub CLI](https://cli.github.com/):
-
-```powershell
-git config user.name "Kamilchik"
-git config user.email "YOUR_GITHUB_NOREPLY_EMAIL"
-git add -A
-git diff --cached --check
-git status --short
-git commit -m "Initial public source release"
-git branch -M main
-gh auth login
-gh repo create e4steam --public --source . --remote origin --push
-```
-
-If `e4steam` was already created on GitHub, replace the last command with:
-
-```powershell
-git remote add origin https://github.com/YOUR_NAME/e4steam.git
-git push -u origin main
-```
-
-These commands publish source only; they do not create a GitHub Release or upload JAR files. After creating the repository, enable **Settings → Security → Private vulnerability reporting** so reports described in `SECURITY.md` have a private destination.
 
 ## Project status
 
