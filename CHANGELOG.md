@@ -5,16 +5,16 @@ belong to this fork and are independent of upstream e4mc releases.
 
 ## 0.2.0 - 2026-08-01
 
+### English
+
 - Verified 99 Windows client launches across Fabric, Quilt, Forge, and NeoForge.
 - Fixed modern Fabric API metadata for Minecraft 26.x.
 - Fixed Forge 1.18.2 startup by removing an invalid inherited `PauseScreen.tick` injection.
-- Stop the restartable Spacewar session when Minecraft connects to a regular server.
+- Spacewar now closes when Minecraft connects to a regular server.
 - Replaced launcher-specific wording with generic Minecraft launcher guidance.
-
 - Promoted e4steam to its first stable public release while keeping Steam App
   ID 480 as the permanent transport namespace.
-- Classified every earlier `0.x-alpha` build as a prerelease and corrected the
-  Modrinth, CurseForge, and GitHub publishing metadata.
+- Removed obsolete alpha releases and normalized the stable release metadata.
 - Documented installation, Steam Overlay setup, troubleshooting, supported
   files, platform limits, and the verified compatibility matrix.
 - Added testable Steam lifecycle boundaries and regression coverage for
@@ -23,6 +23,26 @@ belong to this fork and are independent of upstream e4mc releases.
 - Split Steam runtime responsibilities into lifecycle, packet transport,
   bridge registry, outbound queue, and lobby management components without
   changing the wire protocol.
+
+### Русский
+
+- Проверен запуск 99 клиентов Windows на Fabric, Quilt, Forge и NeoForge.
+- Исправлена зависимость Fabric API для Minecraft 26.x.
+- Исправлен запуск Forge 1.18.2: удалено некорректное внедрение в унаследованный
+  метод `PauseScreen.tick`.
+- Spacewar теперь закрывается при подключении Minecraft к обычному серверу.
+- Убраны упоминания конкретного лаунчера; подсказки подходят для любого
+  лаунчера Minecraft.
+- e4steam выпущен как первый стабильный релиз. Steam App ID 480 остаётся
+  постоянным транспортным идентификатором проекта.
+- Удалены устаревшие альфа-релизы и приведены в порядок данные стабильного релиза.
+- Добавлены инструкции по установке, настройке оверлея Steam, устранению проблем,
+  выбору файла и ограничениям платформ.
+- Добавлены тесты перезапуска Steam, отмены подключения, неверных и просроченных
+  приглашений, незнакомых пользователей, переполнения очереди, отключения Steam,
+  закрытия мира, потери лобби и одновременных гостей.
+- SteamRuntime разделён на компоненты жизненного цикла, транспорта пакетов,
+  реестра соединений, очереди отправки и управления лобби без изменения протокола.
 
 ## 0.2.0-alpha.4 - 2026-08-01
 
