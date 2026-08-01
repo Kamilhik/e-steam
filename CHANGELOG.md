@@ -3,7 +3,7 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
-## 0.2.0-alpha.4 - Unreleased
+## 0.2.0-alpha.4 - 2026-08-01
 
 - Added an activity-scoped UDP tunnel alongside the existing Minecraft TCP
   bridge, enabling voice chat and other UDP-based mods.
