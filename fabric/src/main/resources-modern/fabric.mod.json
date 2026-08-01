@@ -3,7 +3,7 @@
   "id": "e4steam",
   "version": "${version}+modern",
   "name": "e4steam",
-  "description": "Share an integrated Minecraft LAN world through Steam P2P and Valve relays (App ID 480 test build). Created by Kamilchik.",
+  "description": "Share an integrated Minecraft LAN world through Steam P2P and Valve relays using App ID 480. Created by Kamilchik.",
   "authors": [
     "Kamilchik"
   ],

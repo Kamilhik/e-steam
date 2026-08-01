@@ -90,6 +90,6 @@ $releaseJars | Get-FileHash -Algorithm SHA256
 ```
 
 Test the matching JAR in a clean instance for every advertised Minecraft/loader
-combination. For Shift+Tab, launch Prism Launcher from a Steam non-Steam
+combination. For Shift+Tab, launch your Minecraft launcher from a Steam non-Steam
 shortcut and verify that the in-game Steam button reports the overlay as
 available.

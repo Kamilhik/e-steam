@@ -182,6 +182,18 @@ public class E4steamClient {
         replacement.startAsync();
     }
 
+    /** Stops Spacewar before Minecraft connects to a regular, non-e4steam server. */
+    public static void stopSteamForDirectServerConnection() {
+        SteamSession current = session;
+        if (current != null) {
+            current.stop();
+            if (session == current) {
+                session = null;
+            }
+        }
+        SteamRuntime.get().stopForDirectServerConnection();
+    }
+
     /** Called by the Steam callback thread after a validated lobby invitation was accepted. */
     public static void acceptSteamInvite(String endpoint, String hostName) {
         if (SteamAddress.tryParse(endpoint).isEmpty()) {

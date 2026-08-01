@@ -1,4 +1,5 @@
 build/
+/release/
 *.ipr
 run/
 *.iws

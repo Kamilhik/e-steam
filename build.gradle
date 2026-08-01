@@ -101,6 +101,7 @@ tasks.register("releaseJars") {
         def variants = [
                 [
                         label: "Fabric/Quilt 1.17-1.18.2",
+                        publicName: "e4steam-fabric-quilt-mc1.17-1.18.2-v${version}.jar",
                         file: file("legacy/fabric/build/libs/e4steam-fabric-${version}-mc1.17-1.18.2.jar"),
                         major: 60,
                         metadata: ["fabric.mod.json": [
@@ -112,6 +113,7 @@ tasks.register("releaseJars") {
                 ],
                 [
                         label: "Forge legacy17",
+                        publicName: "e4steam-forge-mc1.17.1-1.18.1-v${version}.jar",
                         file: file("legacy/forge/build/libs/e4steam-forge-${version}-legacy17.jar"),
                         major: 60,
                         metadata: ["META-INF/mods.toml": [
@@ -122,6 +124,7 @@ tasks.register("releaseJars") {
                 ],
                 [
                         label: "Fabric/Quilt",
+                        publicName: "e4steam-fabric-quilt-mc1.19-1.21.11-v${version}.jar",
                         file: file("fabric/build/libs/e4steam-fabric-${version}.jar"),
                         major: 61,
                         metadata: ["fabric.mod.json": [
@@ -133,6 +136,7 @@ tasks.register("releaseJars") {
                 ],
                 [
                         label: "Fabric/Quilt Modern",
+                        publicName: "e4steam-fabric-quilt-mc26.1-26.2-v${version}.jar",
                         file: file("fabric/build/libs/e4steam-fabric-${version}-modern.jar"),
                         major: 61,
                         metadata: ["fabric.mod.json": [
@@ -144,6 +148,7 @@ tasks.register("releaseJars") {
                 ],
                 [
                         label: "Forge",
+                        publicName: "e4steam-forge-mc1.18.2-1.20.2-v${version}.jar",
                         file: file("forge/build/libs/e4steam-forge-${version}.jar"),
                         major: 61,
                         metadata: ["META-INF/mods.toml": [
@@ -154,6 +159,7 @@ tasks.register("releaseJars") {
                 ],
                 [
                         label: "NeoForge",
+                        publicName: "e4steam-neoforge-mc1.20.2-26.2-v${version}.jar",
                         file: file("neoforge/build/libs/e4steam-neoforge-${version}.jar"),
                         major: 61,
                         metadata: [
@@ -310,6 +316,18 @@ tasks.register("releaseJars") {
             } finally {
                 zip.close()
             }
+        }
+        File publicDirectory = file("release/${version}")
+        delete(fileTree(publicDirectory) { include "*.jar" })
+        variants.each { variant ->
+            copy {
+                from variant.file
+                into publicDirectory
+                rename { variant.publicName }
+            }
+        }
+        if (fileTree(publicDirectory) { include "*.jar" }.files.size() != variants.size()) {
+            throw new GradleException("Could not assemble all public release JARs in ${publicDirectory}")
         }
         println("Artifact audit passed for all six runtime JAR variants.")
     }

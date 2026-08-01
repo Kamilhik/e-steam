@@ -11,7 +11,7 @@ displayTest = "IGNORE_ALL_VERSION"
 authors = "Kamilchik"
 description = '''
 Share an integrated Minecraft LAN world through Steam P2P and Valve relays.
-Experimental App ID 480 test build; both players need the mod and Steam.
+Uses the permanent App ID 480 workflow; both players need the mod and Steam.
 Created by Kamilchik.
 '''
 

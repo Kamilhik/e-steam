@@ -50,11 +50,6 @@ public abstract class PauseScreenMixin extends Screen {
         e4steam$refreshInviteButton();
     }
 
-    @Inject(method = "tick", at = @At("TAIL"))
-    private void e4steam$refreshInviteButtonEachTick(CallbackInfo ci) {
-        e4steam$refreshInviteButton();
-    }
-
     @Unique
     private void e4steam$openInviteOverlay() {
         Button button = e4steam$inviteButton;

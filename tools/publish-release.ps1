@@ -1,7 +1,9 @@
 param(
-    [string]$Version = "0.2.0-alpha.4",
+    [string]$Version = "0.2.0",
     [string]$SecretsFile = ".env.publisher",
-    [string]$ReleaseDirectory = "release/0.2.0-alpha.4",
+    [string]$ReleaseDirectory = "",
+    [ValidateSet("auto", "alpha", "beta", "release")]
+    [string]$ReleaseType = "auto",
     [ValidateSet("all", "modrinth", "curseforge")]
     [string]$Target = "all",
     [switch]$DryRun
@@ -27,10 +29,13 @@ function Get-Changelog([string]$Path, [string]$ReleaseVersion) {
     $escaped = [Regex]::Escape($ReleaseVersion)
     $match = [Regex]::Match(
         $text,
-        "(?ms)^##\s+$escaped\s+-\s+[^\r\n]+\r?\n\r?\n(?<body>.*?)(?=^##\s+|\z)"
+        "(?ms)^##\s+$escaped\s+-\s+(?<date>[^\r\n]+)\r?\n\r?\n(?<body>.*?)(?=^##\s+|\z)"
     )
     if (-not $match.Success) {
         throw "Could not find changelog section for $ReleaseVersion"
+    }
+    if ($match.Groups["date"].Value.Trim() -eq "Unreleased") {
+        throw "Update CHANGELOG.md with the release date before publishing or creating a tag"
     }
     return $match.Groups["body"].Value.Trim()
 }
@@ -103,6 +108,7 @@ function Publish-Modrinth(
     [object[]]$Entries,
     [string]$Changelog,
     [string]$ReleaseVersion,
+    [string]$Channel,
     [switch]$Preview
 ) {
     $headers = @{
@@ -131,16 +137,16 @@ function Publish-Modrinth(
             changelog = $Changelog
             dependencies = @()
             game_versions = @($entry.GameVersions)
-            version_type = "release"
+            version_type = $Channel
             loaders = @($entry.Loaders)
             featured = $true
             status = "listed"
             file_parts = @("file")
             primary_file = "file"
-            environment = "client_and_server"
+            environment = "client_only"
         }
         if ($Preview) {
-            Write-Host "[Modrinth] Would upload $($entry.File) as Release ($($entry.Label))"
+            Write-Host "[Modrinth] Would upload $($entry.File) as $Channel ($($entry.Label))"
             continue
         }
 
@@ -160,6 +166,7 @@ function Publish-CurseForge(
     [object[]]$Entries,
     [string]$Changelog,
     [string]$ReleaseVersion,
+    [string]$Channel,
     [switch]$Preview
 ) {
     $headers = @{ "X-Api-Token" = $Config.CURSEFORGE_TOKEN }
@@ -176,11 +183,11 @@ function Publish-CurseForge(
                     "forge" { "Forge" }
                     "neoforge" { "NeoForge" }
                 }
-            }) + @("Client", "Server")
-            releaseType = "release"
+            }) + @("Client")
+            releaseType = $Channel
         }
         if ($Preview) {
-            Write-Host "[CurseForge] Would upload $($entry.File) as Release ($($entry.Label))"
+            Write-Host "[CurseForge] Would upload $($entry.File) as $Channel ($($entry.Label))"
             continue
         }
 
@@ -193,6 +200,19 @@ function Publish-CurseForge(
             -FilePath $filePath
         Write-Host "[CurseForge] Uploaded $($entry.File) -> file $($result.id)"
     }
+}
+
+if ([string]::IsNullOrWhiteSpace($ReleaseDirectory)) {
+    $ReleaseDirectory = "release/$Version"
+}
+$effectiveReleaseType = if ($ReleaseType -ne "auto") {
+    $ReleaseType
+} elseif ($Version -match '(?i)(?:^|[-.])alpha(?:[-.]|$)') {
+    "alpha"
+} elseif ($Version -match '(?i)(?:^|[-.])beta(?:[-.]|$)') {
+    "beta"
+} else {
+    "release"
 }
 
 $config = Read-EnvFile $SecretsFile
@@ -243,11 +263,11 @@ foreach ($entry in $entries) {
 }
 
 $changelog = Get-Changelog "CHANGELOG.md" $Version
-Write-Host "Publishing $($entries.Count) artifacts as Release; changelog length: $($changelog.Length)"
+Write-Host "Publishing $($entries.Count) artifacts as $effectiveReleaseType; changelog length: $($changelog.Length)"
 
 if ($Target -in @("all", "modrinth")) {
-    Publish-Modrinth $config $entries $changelog $Version -Preview:$DryRun
+    Publish-Modrinth $config $entries $changelog $Version $effectiveReleaseType -Preview:$DryRun
 }
 if ($Target -in @("all", "curseforge")) {
-    Publish-CurseForge $config $entries $changelog $Version -Preview:$DryRun
+    Publish-CurseForge $config $entries $changelog $Version $effectiveReleaseType -Preview:$DryRun
 }

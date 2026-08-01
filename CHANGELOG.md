@@ -3,6 +3,27 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
+## 0.2.0 - 2026-08-01
+
+- Verified 99 Windows client launches across Fabric, Quilt, Forge, and NeoForge.
+- Fixed modern Fabric API metadata for Minecraft 26.x.
+- Fixed Forge 1.18.2 startup by removing an invalid inherited `PauseScreen.tick` injection.
+- Stop the restartable Spacewar session when Minecraft connects to a regular server.
+- Replaced launcher-specific wording with generic Minecraft launcher guidance.
+
+- Promoted e4steam to its first stable public release while keeping Steam App
+  ID 480 as the permanent transport namespace.
+- Classified every earlier `0.x-alpha` build as a prerelease and corrected the
+  Modrinth, CurseForge, and GitHub publishing metadata.
+- Documented installation, Steam Overlay setup, troubleshooting, supported
+  files, platform limits, and the verified compatibility matrix.
+- Added testable Steam lifecycle boundaries and regression coverage for
+  restart, cancellation, invalid or expired invitations, unknown peers, queue
+  overflow, Steam loss, world shutdown, lobby loss, and concurrent guests.
+- Split Steam runtime responsibilities into lifecycle, packet transport,
+  bridge registry, outbound queue, and lobby management components without
+  changing the wire protocol.
+
 ## 0.2.0-alpha.4 - 2026-08-01
 
 - Added an activity-scoped UDP tunnel alongside the existing Minecraft TCP

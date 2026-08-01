@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /** Steam lobby, friends, overlay and invite state. Called only by the Steam worker. */
-final class SteamSocial implements AutoCloseable {
+final class SteamLobbyManager implements AutoCloseable {
     private static final String KEY_PROTOCOL = "e4steam_protocol";
     private static final String KEY_MINECRAFT = "e4steam_minecraft";
     private static final String KEY_ENDPOINT = "e4steam_endpoint";
@@ -42,7 +42,7 @@ final class SteamSocial implements AutoCloseable {
     private long requestedJoinDeadlineMillis;
     private final Set<Long> canceledJoinLobbyIds = new HashSet<>();
 
-    SteamSocial(SteamRuntime runtime) {
+    SteamLobbyManager(SteamRuntime runtime) {
         this.runtime = runtime;
         friends = new SteamFriends(new SteamFriendsCallback() {
             @Override
@@ -219,8 +219,7 @@ final class SteamSocial implements AutoCloseable {
     void clientBridgeOpened(long remoteSteamId) {
         GuestLobby current = guestLobby;
         if (current != null && current.hostSteamId == remoteSteamId) {
-            current.connected = true;
-            current.deadlineMillis = Long.MAX_VALUE;
+            current.joinState.connected();
         }
     }
 
@@ -240,11 +239,9 @@ final class SteamSocial implements AutoCloseable {
         if (current == null
                 || endpoint == null
                 || !endpoint.equals(current.endpoint)
-                || current.claimed
-                || current.connectingStarted) {
+                || !current.joinState.claim()) {
             return false;
         }
-        current.claimed = true;
         return true;
     }
 
@@ -252,12 +249,10 @@ final class SteamSocial implements AutoCloseable {
         GuestLobby current = guestLobby;
         if (current != null
                 && endpoint != null
-                && endpoint.equals(current.endpoint)
-                && !current.connectingStarted) {
-            current.claimed = true;
-            current.connectingStarted = true;
-            current.deadlineMillis = System.currentTimeMillis() + GUEST_JOIN_TIMEOUT_MILLIS;
-            return true;
+                && endpoint.equals(current.endpoint)) {
+            return current.joinState.beginConnect(
+                    System.currentTimeMillis() + GUEST_JOIN_TIMEOUT_MILLIS
+            );
         }
         return false;
     }
@@ -269,10 +264,9 @@ final class SteamSocial implements AutoCloseable {
             return;
         }
         GuestLobby current = guestLobby;
-        if (current != null && !current.connected && current.deadlineMillis <= now) {
+        if (current != null && current.joinState.expired(now)) {
             if (runtime.hasClientBridgeForRemote(current.hostSteamId)) {
-                current.connected = true;
-                current.deadlineMillis = Long.MAX_VALUE;
+                current.joinState.connected();
                 return;
             }
             leaveGuestLobby();
@@ -360,7 +354,7 @@ final class SteamSocial implements AutoCloseable {
         }
         if (guestLobby != null
                 && (guestLobby.endpoint != null
-                || guestLobby.connected
+                || guestLobby.joinState.isConnected()
                 || runtime.hasClientBridgeForRemote(guestLobby.hostSteamId))) {
             E4steamClient.showSteamJoinFailure(Mirror.translatable("text.e4steam_minecraft.joinCurrentSession"));
             return;
@@ -453,7 +447,7 @@ final class SteamSocial implements AutoCloseable {
         // The in-world confirmation has no countdown. Keep this lobby alive
         // until the user chooses Join, then beginGuestConnect() starts the
         // bounded Minecraft connection window.
-        current.deadlineMillis = Long.MAX_VALUE;
+        current.joinState.waitForConfirmation();
         String hostName = friends.getFriendPersonaName(SteamID.createFromNativeHandle(current.hostSteamId));
         E4steamClient.acceptSteamInvite(endpoint, hostName);
     }
@@ -461,7 +455,7 @@ final class SteamSocial implements AutoCloseable {
     private void requireOverlay() throws IOException {
         if (!runtime.isOverlayEnabledOnWorker()) {
             throw new IOException(
-                    "Steam Overlay is unavailable. Add Prism Launcher to Steam and launch it from Steam first"
+                    "Steam Overlay is unavailable. Add your Minecraft launcher to Steam and launch it from Steam first"
             );
         }
     }
@@ -505,6 +499,7 @@ final class SteamSocial implements AutoCloseable {
         if (lost == null) {
             return;
         }
+        lost.joinState.loseLobby();
         runtime.closeRemoteBridges(lost.hostSteamId);
         leaveGuestLobby();
         E4steamClient.showSteamJoinFailure(Mirror.translatable("text.e4steam_minecraft.joinLobbyClosed"));
@@ -518,6 +513,7 @@ final class SteamSocial implements AutoCloseable {
         requestedFriendId = 0;
         requestedJoinDeadlineMillis = 0;
         if (current != null) {
+            current.joinState.cancel();
             matchmaking.leaveLobby(SteamID.createFromNativeHandle(current.lobbyId));
         } else if (requested != 0) {
             // LobbyEnter does not identify the JoinLobby API call. Preserve a
@@ -581,17 +577,14 @@ final class SteamSocial implements AutoCloseable {
         private final long hostSteamId;
         @SuppressWarnings("unused")
         private final long inviterSteamId;
-        private long deadlineMillis;
+        private final SteamGuestJoinState joinState;
         private String endpoint;
-        private boolean claimed;
-        private boolean connectingStarted;
-        private boolean connected;
 
         private GuestLobby(long lobbyId, long hostSteamId, long inviterSteamId, long deadlineMillis) {
             this.lobbyId = lobbyId;
             this.hostSteamId = hostSteamId;
             this.inviterSteamId = inviterSteamId;
-            this.deadlineMillis = deadlineMillis;
+            this.joinState = new SteamGuestJoinState(deadlineMillis);
         }
     }
 }
