@@ -24,7 +24,7 @@ final class SteamSocial implements AutoCloseable {
     private static final String KEY_PROTOCOL = "e4steam_protocol";
     private static final String KEY_MINECRAFT = "e4steam_minecraft";
     private static final String KEY_ENDPOINT = "e4steam_endpoint";
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = "2";
     private static final String LOBBY_CONNECT_PREFIX = "e4steam-lobby:";
     private static final long GUEST_JOIN_TIMEOUT_MILLIS = 30_000;
 

@@ -111,7 +111,13 @@ public final class SteamSession {
                 if (state != State.STARTING) {
                     return;
                 }
-                runtime.startHosting(this, localPort, inviteToken, accessMode);
+                runtime.startHosting(
+                        this,
+                        localPort,
+                        Config.INSTANCE.voiceChatPort.value(),
+                        inviteToken,
+                        accessMode
+                );
                 newAddress = new SteamAddress(runtime.steamIdValue(), inviteToken);
                 address = newAddress;
                 lobbyCreated = runtime.createHostLobby(this, accessMode, newAddress);

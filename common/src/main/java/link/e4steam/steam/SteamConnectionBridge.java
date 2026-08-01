@@ -57,6 +57,10 @@ final class SteamConnectionBridge {
         return connectionId;
     }
 
+    int localPort() {
+        return socket.getLocalPort();
+    }
+
     boolean isHostSide() {
         return hostOwner != null;
     }
@@ -140,6 +144,7 @@ final class SteamConnectionBridge {
         }
 
         try {
+            runtime.closeUdpBridge(this);
             try {
                 socket.close();
             } catch (IOException ignored) {

@@ -18,4 +18,7 @@ public class Config extends ReflectiveConfig {
 
     @Comment("Whether to share opened LAN worlds through Steam P2P and Valve relays")
     public final TrackedValue<Boolean> hostEnabled = this.value(true);
+
+    @Comment("Fallback UDP port for voice mods and other UDP services; Simple Voice Chat and Plasmo Voice are detected automatically; use 0 to disable the fallback")
+    public final TrackedValue<Integer> voiceChatPort = this.value(24454);
 }

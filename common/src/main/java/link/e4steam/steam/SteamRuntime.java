@@ -45,10 +45,11 @@ import java.util.function.Function;
 public final class SteamRuntime {
     private static final int APP_ID = 480;
     private static final int CHANNEL = 480;
-    // 1792 DATA + 64 OPEN + 64 standalone RESET + two terminal frames for
-    // each of 64 active bridges equals the queue's 2048-packet capacity.
+    // Category limits leave room for terminal frames while preventing UDP
+    // voice traffic from starving Minecraft's reliable TCP stream.
     private static final int MAX_OUTBOUND_PACKETS = 2048;
-    private static final int MAX_OUTBOUND_DATA_PACKETS = 1792;
+    private static final int MAX_OUTBOUND_DATA_PACKETS = 1408;
+    private static final int MAX_OUTBOUND_DATAGRAM_PACKETS = 384;
     private static final int MAX_OUTBOUND_OPEN_PACKETS = 64;
     private static final int MAX_OUTBOUND_STANDALONE_RESETS = 64;
     private static final int MAX_PACKETS_PER_TICK = 512;
@@ -71,10 +72,12 @@ public final class SteamRuntime {
     private final Object outboundQueueLock = new Object();
     private final ArrayBlockingQueue<OutboundPacket> outbound = new ArrayBlockingQueue<>(MAX_OUTBOUND_PACKETS);
     private final Semaphore outboundDataSlots = new Semaphore(MAX_OUTBOUND_DATA_PACKETS);
+    private final Semaphore outboundDatagramSlots = new Semaphore(MAX_OUTBOUND_DATAGRAM_PACKETS);
     private final Semaphore outboundOpenSlots = new Semaphore(MAX_OUTBOUND_OPEN_PACKETS);
     private final Semaphore outboundStandaloneResetSlots = new Semaphore(MAX_OUTBOUND_STANDALONE_RESETS);
     private final Semaphore activeBridgeSlots = new Semaphore(MAX_ACTIVE_CONNECTIONS);
     private final ConcurrentHashMap<BridgeKey, SteamConnectionBridge> bridges = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<BridgeKey, SteamUdpBridge> udpBridges = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, Long> pendingPeers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, IdleSessionDeadline> idleSessionDeadlines = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<SteamTask<?>> steamTasks = new ConcurrentLinkedQueue<>();
@@ -168,6 +171,7 @@ public final class SteamRuntime {
     void startHosting(
             SteamSession owner,
             int localPort,
+            int udpPort,
             byte[] token,
             SteamAccessMode accessMode
     ) throws IOException {
@@ -178,8 +182,25 @@ public final class SteamRuntime {
         if (accessMode == SteamAccessMode.LOCAL_ONLY) {
             throw new IOException("Local-only mode does not start Steam hosting");
         }
+        if (udpPort < 0 || udpPort > 65535) {
+            throw new IOException("Invalid UDP tunnel port: " + udpPort);
+        }
 
-        HostRegistration replacement = new HostRegistration(owner, localPort, token.clone(), accessMode);
+        VoiceChatUdpEndpoint udpEndpoint = VoiceChatUdpEndpoint.resolve(localPort, udpPort);
+        HostRegistration replacement = new HostRegistration(
+                owner,
+                localPort,
+                udpEndpoint,
+                token.clone(),
+                accessMode
+        );
+        if (udpEndpoint.hostPort() > 0) {
+            E4steamClient.LOGGER.info(
+                    "Using UDP port {} for {}",
+                    udpEndpoint.hostPort(),
+                    udpEndpoint.source()
+            );
+        }
         synchronized (lifecycleLock) {
             HostRegistration current = hostRegistration;
             if (current != null && current.owner() != owner) {
@@ -337,11 +358,101 @@ public final class SteamRuntime {
         );
     }
 
+    private boolean sendOpenAck(SteamConnectionBridge bridge, VoiceChatUdpEndpoint endpoint) {
+        return enqueueControl(
+                bridge.remoteSteamId(),
+                bridge.connectionId(),
+                SteamProtocol.encodeOpenAck(bridge.connectionId(), endpoint),
+                PacketKind.OPEN_ACK,
+                bridge
+        );
+    }
+
     boolean sendData(SteamConnectionBridge bridge, byte[] payload) {
         return enqueueData(
                 bridge,
                 SteamProtocol.encodeData(bridge.connectionId(), payload)
         );
+    }
+
+    void sendDatagram(SteamUdpBridge bridge, byte[] payload) {
+        SteamConnectionBridge owner = bridge.owner();
+        byte[] packet = SteamProtocol.encodeDatagram(owner.connectionId(), payload);
+        synchronized (outboundQueueLock) {
+            if (status != Status.RUNNING
+                    || isWorkerStopping()
+                    || bridge.isClosed()
+                    || owner.isClosed()
+                    || !outboundDatagramSlots.tryAcquire()) {
+                return;
+            }
+            if (!outbound.offer(new OutboundPacket(
+                    owner.remoteSteamId(),
+                    owner.connectionId(),
+                    packet,
+                    PacketKind.DATAGRAM,
+                    owner
+            ))) {
+                outboundDatagramSlots.release();
+            }
+        }
+    }
+
+    private void startClientUdpBridge(SteamConnectionBridge owner, VoiceChatUdpEndpoint endpoint) {
+        startUdpBridge(owner, endpoint.clientPort(owner.localPort()), false);
+    }
+
+    private void startHostUdpBridge(SteamConnectionBridge owner, VoiceChatUdpEndpoint endpoint) {
+        startUdpBridge(owner, endpoint.hostPort(), true);
+    }
+
+    private void startUdpBridge(SteamConnectionBridge owner, int port, boolean hostSide) {
+        if (port == 0 || owner.isClosed()) {
+            return;
+        }
+        if (port < 1 || port > 65535) {
+            E4steamClient.LOGGER.warn("UDP tunneling is disabled because port {} is invalid", port);
+            return;
+        }
+
+        BridgeKey key = new BridgeKey(owner.remoteSteamId(), owner.connectionId());
+        if (udpBridges.containsKey(key)) {
+            return;
+        }
+        SteamUdpBridge bridge = null;
+        try {
+            bridge = hostSide
+                    ? SteamUdpBridge.host(this, owner, port)
+                    : SteamUdpBridge.client(this, owner, port);
+            SteamUdpBridge previous = udpBridges.putIfAbsent(key, bridge);
+            if (previous != null || owner.isClosed()) {
+                bridge.close();
+                return;
+            }
+            bridge.start();
+            E4steamClient.LOGGER.info(
+                    "Opened {} UDP tunnel on port {} for Steam user {}",
+                    hostSide ? "host" : "client",
+                    port,
+                    Long.toUnsignedString(owner.remoteSteamId())
+            );
+        } catch (IOException exception) {
+            if (bridge != null) {
+                bridge.close();
+            }
+            E4steamClient.LOGGER.warn(
+                    "Could not open the optional UDP tunnel on port {}; Minecraft TCP will continue",
+                    port,
+                    exception
+            );
+        }
+    }
+
+    void closeUdpBridge(SteamConnectionBridge owner) {
+        SteamUdpBridge udp = udpBridges.remove(new BridgeKey(owner.remoteSteamId(), owner.connectionId()));
+        if (udp != null) {
+            udp.close();
+        }
     }
 
     boolean sendFin(SteamConnectionBridge bridge) {
@@ -380,6 +491,7 @@ public final class SteamRuntime {
     }
 
     void unregister(SteamConnectionBridge bridge) {
+        closeUdpBridge(bridge);
         purgeOutbound(bridge);
         boolean removed = false;
         boolean anotherBridgeExists = false;
@@ -936,7 +1048,9 @@ public final class SteamRuntime {
             boolean accepted = current.sendP2PPacket(
                     remote,
                     buffer,
-                    SteamNetworking.P2PSend.Reliable,
+                    packet.kind() == PacketKind.DATAGRAM
+                            ? SteamNetworking.P2PSend.UnreliableNoDelay
+                            : SteamNetworking.P2PSend.Reliable,
                     CHANNEL
             );
             SteamConnectionBridge packetBridge = packet.bridge();
@@ -944,7 +1058,7 @@ public final class SteamRuntime {
                 packetBridge.markResetSubmitted();
             } else if (accepted && packet.kind() == PacketKind.FIN && packetBridge != null) {
                 packetBridge.markFinSubmitted();
-            } else if (!accepted && packetBridge != null) {
+            } else if (!accepted && packetBridge != null && packet.kind() != PacketKind.DATAGRAM) {
                 packetBridge.close(false);
             }
         }
@@ -972,7 +1086,7 @@ public final class SteamRuntime {
     }
 
     private Semaphore controlCategorySlots(PacketKind kind, SteamConnectionBridge bridge) {
-        if (kind == PacketKind.OPEN) {
+        if (kind == PacketKind.OPEN || kind == PacketKind.OPEN_ACK) {
             return outboundOpenSlots;
         }
         if (kind == PacketKind.RESET && bridge == null) {
@@ -984,6 +1098,10 @@ public final class SteamRuntime {
     private void releasePacketSlot(OutboundPacket packet) {
         if (packet.kind() == PacketKind.DATA) {
             outboundDataSlots.release();
+            return;
+        }
+        if (packet.kind() == PacketKind.DATAGRAM) {
+            outboundDatagramSlots.release();
             return;
         }
         Semaphore categorySlots = controlCategorySlots(packet.kind(), packet.bridge());
@@ -1043,6 +1161,7 @@ public final class SteamRuntime {
         BridgeKey key = new BridgeKey(remoteSteamId, frame.connectionId());
         switch (frame.type()) {
             case SteamProtocol.OPEN -> handleOpen(remoteSteamId, key, frame.payload());
+            case SteamProtocol.OPEN_ACK -> handleOpenAck(key, frame.payload());
             case SteamProtocol.DATA -> {
                 SteamConnectionBridge bridge = bridges.get(key);
                 if (bridge != null) {
@@ -1061,8 +1180,32 @@ public final class SteamRuntime {
                     bridge.resetFromRemote();
                 }
             }
+            case SteamProtocol.DATAGRAM -> {
+                SteamUdpBridge bridge = udpBridges.get(key);
+                if (bridge != null) {
+                    bridge.acceptSteamDatagram(frame.payload());
+                }
+            }
             default -> {
             }
+        }
+    }
+
+    private void handleOpenAck(BridgeKey key, byte[] payload) {
+        SteamConnectionBridge bridge = bridges.get(key);
+        if (bridge == null || bridge.isHostSide() || bridge.isClosed()) {
+            return;
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(payload);
+        byte clientPortMode = buffer.get();
+        int hostPort = Short.toUnsignedInt(buffer.getShort());
+        try {
+            startClientUdpBridge(
+                    bridge,
+                    VoiceChatUdpEndpoint.fromHandshake(hostPort, clientPortMode)
+            );
+        } catch (IllegalArgumentException exception) {
+            bridge.close(true);
         }
     }
 
@@ -1130,6 +1273,11 @@ public final class SteamRuntime {
             }
             handedOff = true;
             if (hostRegistration != registration) {
+                bridge.close(true);
+                return;
+            }
+            startHostUdpBridge(bridge, registration.udpEndpoint());
+            if (!sendOpenAck(bridge, registration.udpEndpoint())) {
                 bridge.close(true);
                 return;
             }
@@ -1297,7 +1445,9 @@ public final class SteamRuntime {
 
     private enum PacketKind {
         OPEN,
+        OPEN_ACK,
         DATA,
+        DATAGRAM,
         FIN,
         RESET
     }
@@ -1312,6 +1462,7 @@ public final class SteamRuntime {
     private record HostRegistration(
             SteamSession owner,
             int localPort,
+            VoiceChatUdpEndpoint udpEndpoint,
             byte[] token,
             SteamAccessMode accessMode
     ) {

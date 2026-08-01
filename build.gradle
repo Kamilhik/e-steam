@@ -266,6 +266,28 @@ tasks.register("releaseJars") {
                     )
                 }
 
+                def udpBridgeEntry = zip.getEntry("link/e4steam/steam/SteamUdpBridge.class")
+                def udpEndpointEntry = zip.getEntry("link/e4steam/steam/VoiceChatUdpEndpoint.class")
+                def protocolEntry = zip.getEntry("link/e4steam/steam/SteamProtocol.class")
+                def configEntry = zip.getEntry("link/e4steam/Config.class")
+                if (udpBridgeEntry == null || udpEndpointEntry == null
+                        || protocolEntry == null || configEntry == null) {
+                    throw new GradleException("${variant.label} is missing TCP/UDP tunnel support")
+                }
+                String protocolConstants = new String(
+                        zip.getInputStream(protocolEntry).readAllBytes(),
+                        java.nio.charset.StandardCharsets.ISO_8859_1
+                )
+                String configConstants = new String(
+                        zip.getInputStream(configEntry).readAllBytes(),
+                        java.nio.charset.StandardCharsets.ISO_8859_1
+                )
+                if (!protocolConstants.contains("encodeDatagram")
+                        || !protocolConstants.contains("encodeOpenAck")
+                        || !configConstants.contains("voiceChatPort")) {
+                    throw new GradleException("${variant.label} does not expose the UDP voice tunnel")
+                }
+
                 variant.metadata.each { path, expectedFragments ->
                     def entry = zip.getEntry(path)
                     if (entry == null) {

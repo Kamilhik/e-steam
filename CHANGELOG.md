@@ -3,7 +3,21 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
-## 0.2.0-alpha.3 - Unreleased
+## 0.2.0-alpha.4 - Unreleased
+
+- Added an activity-scoped UDP tunnel alongside the existing Minecraft TCP
+  bridge, enabling voice chat and other UDP-based mods.
+- Added automatic runtime port discovery for Simple Voice Chat and automatic
+  Minecraft-port mapping for Plasmo Voice. The selected UDP endpoint is sent
+  to guests during the Steam handshake.
+- Voice datagrams use Steam's unreliable no-delay delivery and a separate
+  bounded queue so voice traffic cannot starve the Minecraft connection.
+- Added local UDP proxy tests, protocol validation, a configurable fallback
+  `voiceChatPort`, and six-artifact UDP audits.
+- Raised the e4steam wire and lobby protocol version to 2; both players must
+  use the same `0.2.0-alpha.4` build.
+
+## 0.2.0-alpha.3 - 2026-08-01
 
 - Increased shared integrated-world capacity to 32 players total, including
   the host, and aligned the Steam lobby with the same limit.

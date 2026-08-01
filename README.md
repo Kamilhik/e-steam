@@ -29,10 +29,13 @@ e4steam позволяет приглашать друзей из Steam прям
 - Открывайте мир для друзей Steam или только по приглашению.
 - Приглашайте друзей через оверлей Steam с помощью **Shift + Tab**.
 - Steam автоматически использует прямое P2P-соединение или ретрансляторы Valve.
+- Minecraft, Simple Voice Chat и Plasmo Voice работают через TCP- и UDP-туннели Steam.
 - В одном открытом мире могут играть до **32 игроков**, включая хоста.
 - После выхода из мира соединение закрывается автоматически.
 
 Мод должен быть установлен у обоих игроков. Также оба игрока должны запустить Steam и войти в свои аккаунты.
+
+Порт Simple Voice Chat определяется автоматически. Для Plasmo Voice автоматически поддерживается обычный режим, в котором UDP использует порт Minecraft. Для другого UDP-мода укажите его порт в `voiceChatPort` в конфигурации e4steam у хоста — гостю порт передастся автоматически.
 
 ### Как начать игру
 
@@ -57,10 +60,13 @@ e4steam lets you invite Steam friends directly into your Minecraft singleplayer 
 - Open a world to Steam friends or by invitation.
 - Invite friends through the Steam overlay with **Shift + Tab**.
 - Steam automatically uses a direct P2P connection or Valve relays.
+- Minecraft, Simple Voice Chat, and Plasmo Voice use Steam TCP and UDP tunnels together.
 - One shared world supports up to **32 players**, including the host.
 - The connection closes automatically when you leave the world.
 
 Both players need e4steam installed and must be signed in to Steam.
+
+The Simple Voice Chat port is detected automatically. Plasmo Voice is also detected in its usual mode where UDP shares the Minecraft port. For another UDP-based mod, set its port as `voiceChatPort` in the host's e4steam configuration; the guest receives it automatically.
 
 ## How to play
 
