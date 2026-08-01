@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 
 function Read-EnvFile([string]$Path) {
     $values = @{}
-    foreach ($rawLine in Get-Content -LiteralPath $Path) {
+    foreach ($rawLine in Get-Content -LiteralPath $Path -Encoding UTF8) {
         $line = $rawLine.Trim()
         if (-not $line -or $line.StartsWith("#") -or -not $line.Contains("=")) {
             continue
@@ -25,7 +25,7 @@ function Read-EnvFile([string]$Path) {
 }
 
 function Get-Changelog([string]$Path, [string]$ReleaseVersion) {
-    $text = Get-Content -LiteralPath $Path -Raw
+    $text = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
     $escaped = [Regex]::Escape($ReleaseVersion)
     $match = [Regex]::Match(
         $text,
