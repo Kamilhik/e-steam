@@ -6,13 +6,18 @@
 
 ### Play Minecraft with friends through Steam
 
-[![Version](https://img.shields.io/github/v/release/Kamilhik/e4steam?display_name=tag&sort=semver)](https://github.com/Kamilhik/e4steam/releases)
-[![Build](https://img.shields.io/github/actions/workflow/status/Kamilhik/e4steam/build.yml?branch=main&label=build)](https://github.com/Kamilhik/e4steam/actions/workflows/build.yml)
-[![CurseForge](https://img.shields.io/badge/CurseForge-e4steam-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/e4steam)
-[![Modrinth](https://img.shields.io/badge/Modrinth-e4steam-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/e4steam)
-[![License](https://img.shields.io/badge/License-MIT-2ea44f)](LICENSE)
+🇬🇧 **English** · 🇷🇺 **Русский**
 
-[Discord](https://discord.gg/WBmKjxqTTs) · [Telegram](https://t.me/Kamilchikm) · [YouTube demo](https://youtu.be/KJ1W_eJ2VK4)
+<a href="https://discord.gg/WBmKjxqTTs" title="Join the Discord server"><img src="https://img.shields.io/badge/-%20-5865F2?style=for-the-badge&logo=discord&logoColor=white" height="42" alt="Discord"></a>
+<a href="https://t.me/Kamilchikm" title="Telegram channel"><img src="https://img.shields.io/badge/-%20-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" height="42" alt="Telegram"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/e4steam" title="Download on CurseForge"><img src="https://img.shields.io/badge/-%20-F16436?style=for-the-badge&logo=curseforge&logoColor=white" height="42" alt="CurseForge"></a>
+<a href="https://github.com/Kamilhik/e4steam" title="GitHub repository"><img src="https://img.shields.io/badge/-%20-181717?style=for-the-badge&logo=github&logoColor=white" height="42" alt="GitHub"></a>
+<a href="https://modrinth.com/project/SqqdJF90" title="View on Modrinth"><img src="https://img.shields.io/badge/-%20-00AF5C?style=for-the-badge&logo=modrinth&logoColor=white" height="42" alt="Modrinth"></a>
+<a href="https://youtu.be/KJ1W_eJ2VK4" title="Watch the demonstration"><img src="https://img.shields.io/badge/-%20-FF0000?style=for-the-badge&logo=youtube&logoColor=white" height="42" alt="YouTube"></a>
+
+[![Version](https://img.shields.io/github/v/release/Kamilhik/e4steam?display_name=tag&sort=semver&style=flat-square)](https://github.com/Kamilhik/e4steam/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/Kamilhik/e4steam/build.yml?branch=main&label=build&style=flat-square)](https://github.com/Kamilhik/e4steam/actions/workflows/build.yml)
+[![License](https://img.shields.io/badge/License-MIT-2ea44f?style=flat-square)](LICENSE)
 
 **🇷🇺 Русская версия находится ниже — [открыть](#русская-версия)**
 
