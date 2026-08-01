@@ -6,7 +6,7 @@
 
 ### Play Minecraft with friends through Steam
 
-**English** · [Русский](README_RU.md)
+**English** · Русский ниже
 
 <a href="https://www.curseforge.com/minecraft/mc-mods/e4steam" title="Download on CurseForge"><img src="https://img.shields.io/badge/-%20-F16436?style=for-the-badge&logo=curseforge&logoColor=white" height="42" alt="CurseForge"></a>
 <a href="https://github.com/Kamilhik/e-steam" title="GitHub repository"><img src="https://img.shields.io/badge/-%20-181717?style=for-the-badge&logo=github&logoColor=white" height="42" alt="GitHub"></a>
@@ -53,6 +53,34 @@ Both players need e4steam installed and must be signed in to Steam.
 [Download e4steam on CurseForge](https://www.curseforge.com/minecraft/mc-mods/e4steam)
 
 The Modrinth page will be added after moderation.
+
+<details>
+<summary><b>Русский — нажмите, чтобы открыть</b></summary>
+
+## Играйте с друзьями в Minecraft через Steam
+
+e4steam позволяет приглашать друзей из Steam прямо в одиночный мир Minecraft — без проброса портов, белого IP и настройки роутера.
+
+- Открывайте мир для друзей Steam или только по приглашению.
+- Приглашайте друзей через оверлей Steam с помощью **Shift + Tab**.
+- Steam автоматически использует прямое P2P-соединение или ретрансляторы Valve.
+- После выхода из мира соединение закрывается автоматически.
+
+Мод должен быть установлен у обоих игроков. Также оба игрока должны запустить Steam и войти в свои аккаунты.
+
+### Как начать игру
+
+1. Установите e4steam на оба компьютера и запустите Steam.
+2. Откройте одиночный мир и выберите **Открыть для сети → Для друзей Steam**.
+3. Нажмите **Пригласить друзей**, отправьте приглашение через Steam и играйте.
+
+### Скачать
+
+[Скачать e4steam на CurseForge](https://www.curseforge.com/minecraft/mc-mods/e4steam)
+
+Ссылка на Modrinth будет добавлена после завершения модерации.
+
+</details>
 
 ---
 
