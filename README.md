@@ -45,6 +45,10 @@ Steam P2P or Valve relays.
 | 1.20.2–1.21.x | NeoForge | `neoforge-mc1.20.2-26.2` | None |
 | 26.1–26.2 | Fabric/Quilt or NeoForge | file containing `mc26.1-26.2` | Fabric API only for Fabric/Quilt |
 
+Each listed JAR already contains both Windows x64 and Linux x64 Steam native
+libraries. Download one file for your Minecraft version and loader; there are
+no separate Windows and Linux builds.
+
 Declared ranges are broader than the manually tested matrix. Check
 [COMPATIBILITY.md](COMPATIBILITY.md); unverified combinations are experimental.
 
@@ -125,6 +129,10 @@ Minecraft и UDP-трафик поддерживаемых голосовых м
 | 1.18.2–1.20.2 | Forge | `forge-mc1.18.2-1.20.2` | Ничего |
 | 1.20.2–1.21.x | NeoForge | `neoforge-mc1.20.2-26.2` | Ничего |
 | 26.1–26.2 | Fabric/Quilt или NeoForge | файл с `mc26.1-26.2` | Fabric API только для Fabric/Quilt |
+
+Каждый указанный JAR уже содержит библиотеки Steam для Windows x64 и Linux x64.
+Для своей версии Minecraft и загрузчика нужно скачать один файл — отдельных
+сборок для Windows и Linux нет.
 
 Заявленный диапазон шире проверенной матрицы. Смотрите
 [COMPATIBILITY.md](COMPATIBILITY.md): непроверенные сочетания считаются экспериментальными.

@@ -39,3 +39,26 @@ jobs:
 
       - name: Test and build the complete runtime matrix
         run: ./gradlew --no-daemon --stacktrace clean releaseJars
+
+  windows-build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set up Java 21 build JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Test and build the complete runtime matrix
+        run: .\gradlew.bat --no-daemon --stacktrace clean releaseJars

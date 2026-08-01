@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping with e4steam. This repository is an experimental,
+Thanks for helping with e4steam. This repository is an
 unofficial derivative of e4mc; it is not affiliated with Valve, Steam, Mojang,
 Microsoft, or the original e4mc maintainers.
 
@@ -60,5 +60,6 @@ when changing it.
 
 Source contributions are welcome under the repository's MIT License. A compiled
 JAR bundles Valve Steamworks redistributables that are not covered by that
-license. Do not attach JARs to a public release or publish them to a mod platform
-until the release gate in `RELEASING.md` has been satisfied.
+license. Stable binaries may be published after the verification and release
+steps in `RELEASING.md` pass. Keep the release type set to **Release** and the
+environment set to **Client required / Server unsupported**.

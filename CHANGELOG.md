@@ -23,6 +23,12 @@ belong to this fork and are independent of upstream e4mc releases.
 - Split Steam runtime responsibilities into lifecycle, packet transport,
   bridge registry, outbound queue, and lobby management components without
   changing the wire protocol.
+- Updated the release, security, contribution, and bug-report documentation
+  for the stable 0.2.0 line.
+- Separated client-launch evidence from manual host/guest multiplayer evidence
+  and added a native Windows build job to GitHub Actions.
+- Documented that every loader/version JAR is shared by Windows x64 and Linux
+  x64 and bundles native Steam libraries for both systems.
 
 ### Русский
 
@@ -43,6 +49,12 @@ belong to this fork and are independent of upstream e4mc releases.
   закрытия мира, потери лобби и одновременных гостей.
 - SteamRuntime разделён на компоненты жизненного цикла, транспорта пакетов,
   реестра соединений, очереди отправки и управления лобби без изменения протокола.
+- Документы выпуска, безопасности, участия в разработке и сообщения об ошибках
+  приведены к состоянию стабильной ветки 0.2.0.
+- Проверки запуска клиента отделены от ручных host/guest-проверок, а в GitHub
+  Actions добавлена отдельная сборка на Windows.
+- Уточнено, что один JAR для выбранной версии и загрузчика используется на
+  Windows x64 и Linux x64 и содержит Steam-библиотеки для обеих систем.
 
 ## 0.2.0-alpha.4 - 2026-08-01
 
