@@ -11,6 +11,7 @@ Open your world to the network, choose Steam Friends or Invite Only access, and 
 - play together in a regular singleplayer world;
 - invite friends through the Steam overlay with **Shift + Tab**;
 - separate Steam Friends and Invite Only access modes;
+- up to 32 players in one shared world, including the host;
 - short addresses for direct connections;
 - colored chat buttons for copying the address, inviting friends, and closing the connection;
 - confirmation before closing an active connection;
@@ -52,6 +53,7 @@ The host and every joining player need Steam and e4steam running. Their Minecraf
 - игра с друзьями в обычном одиночном мире;
 - приглашения через оверлей Steam по сочетанию **Shift + Tab**;
 - отдельные режимы «Для друзей Steam» и «Только по приглашению»;
+- до 32 игроков в одном открытом мире, включая хоста;
 - короткий адрес для прямого подключения;
 - цветные кнопки в чате для копирования адреса, приглашения друзей и закрытия соединения;
 - подтверждение перед закрытием соединения;

@@ -3,7 +3,14 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
-## 0.2.0-alpha.2 - Unreleased
+## 0.2.0-alpha.3 - Unreleased
+
+- Increased shared integrated-world capacity to 32 players total, including
+  the host, and aligned the Steam lobby with the same limit.
+- Added a shared, tested session-limit definition used by both Minecraft and
+  the Steam transport.
+
+## 0.2.0-alpha.2 - 2026-07-31
 
 - Removed the direct pre-1.21 `GenericDirtMessageScreen` link and select the
   renamed 1.21+ `GenericMessageScreen` through the compatibility boundary.

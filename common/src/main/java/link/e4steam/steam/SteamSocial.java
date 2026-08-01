@@ -9,6 +9,7 @@ import com.codedisaster.steamworks.SteamMatchmakingCallback;
 import com.codedisaster.steamworks.SteamNativeHandle;
 import com.codedisaster.steamworks.SteamResult;
 import link.e4steam.E4steamClient;
+import link.e4steam.SessionLimits;
 import link.e4steam.MinecraftVersion;
 import link.e4steam.Mirror;
 
@@ -328,7 +329,7 @@ final class SteamSocial implements AutoCloseable {
         SteamMatchmaking.LobbyType type = requested.accessMode == SteamAccessMode.FRIENDS_ONLY
                 ? SteamMatchmaking.LobbyType.FriendsOnly
                 : SteamMatchmaking.LobbyType.Private;
-        SteamAPICall call = matchmaking.createLobby(type, SteamRuntime.MAX_HOST_CONNECTIONS + 1);
+        SteamAPICall call = matchmaking.createLobby(type, SessionLimits.maxPlayers());
         if (call == null || !call.isValid()) {
             pendingHost = null;
             requested.result.completeExceptionally(new IOException("Steam rejected the lobby creation request"));

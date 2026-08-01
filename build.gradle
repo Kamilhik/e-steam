@@ -250,6 +250,22 @@ tasks.register("releaseJars") {
                     )
                 }
 
+                def limitsEntry = zip.getEntry("link/e4steam/SessionLimits.class")
+                def playerListMixinEntry = zip.getEntry("link/e4steam/mixin/PlayerListMixin.class")
+                if (limitsEntry == null || playerListMixinEntry == null) {
+                    throw new GradleException("${variant.label} is missing the shared 32-player limit")
+                }
+                String playerListMixinConstants = new String(
+                        zip.getInputStream(playerListMixinEntry).readAllBytes(),
+                        java.nio.charset.StandardCharsets.ISO_8859_1
+                )
+                if (!playerListMixinConstants.contains("link/e4steam/SessionLimits")
+                        || !playerListMixinConstants.contains("maxPlayers")) {
+                    throw new GradleException(
+                            "${variant.label} does not apply the shared limit to Minecraft's PlayerList"
+                    )
+                }
+
                 variant.metadata.each { path, expectedFragments ->
                     def entry = zip.getEntry(path)
                     if (entry == null) {

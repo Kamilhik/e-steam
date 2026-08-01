@@ -29,6 +29,7 @@ e4steam позволяет приглашать друзей из Steam прям
 - Открывайте мир для друзей Steam или только по приглашению.
 - Приглашайте друзей через оверлей Steam с помощью **Shift + Tab**.
 - Steam автоматически использует прямое P2P-соединение или ретрансляторы Valve.
+- В одном открытом мире могут играть до **32 игроков**, включая хоста.
 - После выхода из мира соединение закрывается автоматически.
 
 Мод должен быть установлен у обоих игроков. Также оба игрока должны запустить Steam и войти в свои аккаунты.
@@ -56,6 +57,7 @@ e4steam lets you invite Steam friends directly into your Minecraft singleplayer 
 - Open a world to Steam friends or by invitation.
 - Invite friends through the Steam overlay with **Shift + Tab**.
 - Steam automatically uses a direct P2P connection or Valve relays.
+- One shared world supports up to **32 players**, including the host.
 - The connection closes automatically when you leave the world.
 
 Both players need e4steam installed and must be signed in to Steam.

@@ -11,6 +11,7 @@ import com.codedisaster.steamworks.SteamUtils;
 import com.codedisaster.steamworks.SteamUtilsCallback;
 import link.e4steam.Agnos;
 import link.e4steam.E4steamClient;
+import link.e4steam.SessionLimits;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -52,7 +53,6 @@ public final class SteamRuntime {
     private static final int MAX_OUTBOUND_STANDALONE_RESETS = 64;
     private static final int MAX_PACKETS_PER_TICK = 512;
     private static final int MAX_ACTIVE_CONNECTIONS = 64;
-    static final int MAX_HOST_CONNECTIONS = 32;
     private static final int MAX_PENDING_PEERS = 64;
     private static final long PENDING_PEER_TIMEOUT_MILLIS = 10_000;
     private static final long IDLE_SESSION_CLOSE_DELAY_MILLIS = 250;
@@ -1088,7 +1088,7 @@ public final class SteamRuntime {
                 .filter(bridge -> bridge.isHostedBy(registration.owner()))
                 .filter(bridge -> !bridge.isClosed())
                 .count();
-        if (activeHostConnections >= MAX_HOST_CONNECTIONS) {
+        if (activeHostConnections >= SessionLimits.maxGuests()) {
             sendStandaloneReset(remoteSteamId, key.connectionId());
             return;
         }

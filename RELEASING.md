@@ -2,7 +2,7 @@
 
 ## Current gate
 
-`0.2.0-alpha.2` is an unreleased development build. Do not upload its binary
+`0.2.0-alpha.3` is an unreleased development build. Do not upload its binary
 JARs to Modrinth or attach them to a public GitHub release until every
 loader/version combination below has passed a clean-instance smoke test, the
 publisher has personally accepted the applicable Steamworks terms, and Valve
