@@ -1,8 +1,6 @@
 # e4steam compatibility
 
-Build compatibility and multiplayer feature compatibility are tracked
-separately. Reaching the Minecraft main menu proves that the loader can load
-e4steam; it does not by itself prove Steam invitations or voice chat.
+This page records whether Minecraft reaches its main menu with e4steam loaded.
 
 Legend: ✅ verified · ⏳ not yet manually verified · — unsupported.
 
@@ -23,28 +21,13 @@ The exact automated launch records are generated locally in
 `build/client-compatibility.json`. Minecraft 26.x uses the dedicated modern
 Fabric/Quilt artifact.
 
-## Confirmed multiplayer checks
+## Platform status
 
-| Minecraft | Loader | Windows x64 | Linux x64 | Steam invite | Voice chat |
-| --- | --- | --- | --- | --- | --- |
-| 1.20.2 | Fabric | ✅ | ✅ | ✅ | ✅ |
-| 1.20.2 | Forge | ✅ | ⏳ | ✅ | ✅ |
-| 1.20.2 | NeoForge | ✅ | ⏳ | ✅ | ✅ |
-| 1.21.1 | NeoForge | ✅ client launch | ⏳ | ⏳ | ⏳ |
+| Platform | Status |
+| --- | --- |
+| Windows x64 | ✅ Verified with the 99 client launches above |
+| Linux x64 | Experimental — not included in this local launch matrix |
+| macOS | — Unsupported |
+| 32-bit operating systems | — Unsupported |
 
-Only cells marked ✅ have completed that specific check. Other combinations
-remain experimental for host/guest networking even when their client launch is
-confirmed above.
-
-## Full host/guest procedure
-
-1. Launch clean clients on both computers.
-2. Start, stop, and restart sharing.
-3. Test friends-only and invitation-only lobbies.
-4. Send and accept a Shift+Tab invitation.
-5. Join, disconnect, and connect to a regular server; Spacewar must close.
-6. Test Simple Voice Chat or Plasmo Voice in both directions.
-7. Close the world while a guest is connecting.
-8. Disconnect Steam and verify recovery.
-
-Dedicated servers, macOS, and 32-bit operating systems are unsupported.
+Dedicated servers are unsupported.
