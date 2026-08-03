@@ -9,6 +9,7 @@ belong to this fork and are independent of upstream e4mc releases.
 
 - Removed the experimental 32-player expansion and restored Minecraft's
   standard integrated-world limit of 8 players including the host.
+- Fixed the endless world/terrain loading screen on Minecraft 26.2.
 - Rechecked world loading and Steam LAN sharing on Fabric 26.2, Quilt 1.20.2,
   Forge 1.20.2, and NeoForge 1.21.1.
 
@@ -16,6 +17,7 @@ belong to this fork and are independent of upstream e4mc releases.
 
 - Удалено экспериментальное расширение до 32 игроков и возвращён стандартный
   лимит Minecraft: 8 игроков вместе с хостом.
+- Исправлена бесконечная загрузка мира/территории на Minecraft 26.2.
 - Повторно проверены загрузка мира и открытие Steam-LAN на Fabric 26.2,
   Quilt 1.20.2, Forge 1.20.2 и NeoForge 1.21.1.
 
