@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "The Steam lobby was closed or you no longer have access",
   "text.e4steam_minecraft.joinExpired": "This Steam invitation is no longer active",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Finish or cancel the current server connection before accepting a Steam invitation",
-  "text.e4steam_minecraft.joinCancelPending": "Steam is still cancelling the previous attempt. Retry shortly, or leave Multiplayer for a moment and reopen it."
+  "text.e4steam_minecraft.joinCancelPending": "Steam is still cancelling the previous attempt. Retry shortly, or leave Multiplayer for a moment and reopen it.",
+  "text.e4steam_minecraft.onlineMode": "Online Mode",
+  "text.e4steam_minecraft.onlineModeHelp": "Allow players without a Minecraft license to join. Offline players have name-based accounts and no skins.",
+  "text.e4steam_minecraft.offlineModeEnabled": "Offline Mode enabled",
+  "text.e4steam_minecraft.offlineModeDisabled": "Offline Mode disabled",
+  "text.e4steam_minecraft.offlineModeNote": "Applies to new connections only"
 }

@@ -55,6 +55,25 @@ public abstract class ShareToLanScreenMixin extends Screen {
         addRenderableWidget(accessButton);
     }
 
+    @Inject(method = "init", at = @At("TAIL"))
+    private void e4steam$addOnlineMode(CallbackInfo ci) {
+        CycleButton<Boolean> onlineModeButton = CycleButton.<Boolean>onOffBuilder()
+                .withInitialValue(!Config.INSTANCE.offlineMode.value())
+                .create(
+                        width / 2 - 155,
+                        height - 76,
+                        310,
+                        20,
+                        Mirror.translatable("text.e4steam_minecraft.onlineMode"),
+                        (button, value) -> Config.INSTANCE.offlineMode.setValue(!value, true)
+                );
+        MinecraftUiCompat.tooltip(
+                onlineModeButton,
+                Mirror.translatable("text.e4steam_minecraft.onlineModeHelp")
+        );
+        addRenderableWidget(onlineModeButton);
+    }
+
     @Unique
     private static Component e4steam$accessModeName(SteamAccessMode mode) {
         return Mirror.translatable(mode.translationKey());

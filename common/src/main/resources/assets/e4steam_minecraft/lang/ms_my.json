@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Lobi Steam telah ditutup atau anda tidak lagi mempunyai akses",
   "text.e4steam_minecraft.joinExpired": "Jemputan Steam ini tidak lagi aktif",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Selesaikan atau batalkan sambungan pelayan semasa sebelum menerima jemputan Steam",
-  "text.e4steam_minecraft.joinCancelPending": "Steam masih membatalkan percubaan sebelumnya. Cuba lagi sebentar lagi, atau keluar daripada menu Berbilang Pemain seketika dan buka semula."
+  "text.e4steam_minecraft.joinCancelPending": "Steam masih membatalkan percubaan sebelumnya. Cuba lagi sebentar lagi, atau keluar daripada menu Berbilang Pemain seketika dan buka semula.",
+  "text.e4steam_minecraft.onlineMode": "Mod dalam talian",
+  "text.e4steam_minecraft.onlineModeHelp": "Benarkan pemain tanpa lesen Minecraft menyertai. Pemain luar talian menggunakan akaun berdasarkan nama dan tiada skin.",
+  "text.e4steam_minecraft.offlineModeEnabled": "Mod luar talian diaktifkan",
+  "text.e4steam_minecraft.offlineModeDisabled": "Mod luar talian dinyahaktifkan",
+  "text.e4steam_minecraft.offlineModeNote": "Hanya terpakai kepada sambungan baharu"
 }

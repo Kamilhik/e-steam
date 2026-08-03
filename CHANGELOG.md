@@ -3,6 +3,28 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
+## Unreleased
+
+### English
+
+- Added an offline mode that lets players without a Minecraft license join a
+  shared world. Enabled via the new `offlineMode` config option (default off),
+  the Online Mode toggle on the Open to LAN screen, or the `/e4steam
+  offlinemode` command.
+- Offline players are identified by name-based accounts and have no skins.
+- Offline mode applies to new connections only; toggling it does not kick
+  players already in the world.
+
+### Русский
+
+- Добавлен офлайн-режим, позволяющий игрокам без лицензии Minecraft подключаться
+  к общему миру. Включается опцией `offlineMode` в конфиге (по умолчанию выключен),
+  кнопкой «Онлайн-режим» на экране «Открыть для LAN» или командой
+  `/e4steam offlinemode`.
+- Офлайн-игроки получают аккаунты на основе имени и не видят скины.
+- Офлайн-режим действует только на новые подключения; переключение не выгоняет
+  игроков, уже находящихся в мире.
+
 ## 0.2.1 - 2026-08-03
 
 ### English

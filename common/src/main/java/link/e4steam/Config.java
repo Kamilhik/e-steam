@@ -16,6 +16,9 @@ public class Config extends ReflectiveConfig {
     @Comment("Whether to use the Minecraft whitelist on LAN worlds shared through Steam")
     public final TrackedValue<Boolean> useWhiteList = this.value(false);
 
+    @Comment("Whether to allow players without a Minecraft license (offline mode). They get name-based accounts and no skins")
+    public final TrackedValue<Boolean> offlineMode = this.value(false);
+
     @Comment("Whether to share opened LAN worlds through Steam P2P and Valve relays")
     public final TrackedValue<Boolean> hostEnabled = this.value(true);
 

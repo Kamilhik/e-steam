@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Лобі Steam закрито або ви більше не маєте доступу",
   "text.e4steam_minecraft.joinExpired": "Це запрошення Steam більше не діє",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Завершіть або скасуйте поточне підключення до сервера, перш ніж приймати запрошення Steam",
-  "text.e4steam_minecraft.joinCancelPending": "Steam ще скасовує попередню спробу. Повторіть трохи пізніше або ненадовго вийдіть із «Мережевої гри» й відкрийте її знову."
+  "text.e4steam_minecraft.joinCancelPending": "Steam ще скасовує попередню спробу. Повторіть трохи пізніше або ненадовго вийдіть із «Мережевої гри» й відкрийте її знову.",
+  "text.e4steam_minecraft.onlineMode": "Онлайн-режим",
+  "text.e4steam_minecraft.onlineModeHelp": "Дозволити вхід гравцям без ліцензії Minecraft. Офлайн-гравці отримують акаунти на основі імені та без скінів.",
+  "text.e4steam_minecraft.offlineModeEnabled": "Офлайн-режим увімкнено",
+  "text.e4steam_minecraft.offlineModeDisabled": "Офлайн-режим вимкнено",
+  "text.e4steam_minecraft.offlineModeNote": "Застосовується лише до нових підключень"
 }

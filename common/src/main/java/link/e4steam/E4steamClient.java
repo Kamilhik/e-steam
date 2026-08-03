@@ -139,6 +139,24 @@ public class E4steamClient {
                             }
                             return 1;
                         }))
+                        .then(Commands.literal("offlinemode").executes(ctx -> {
+                            boolean current = Config.INSTANCE.offlineMode.value();
+                            Config.INSTANCE.offlineMode.setValue(!current, true);
+                            Mirror.sendSuccessToSource(
+                                    ctx.getSource(),
+                                    Mirror.translatable(current
+                                            ? "text.e4steam_minecraft.offlineModeDisabled"
+                                            : "text.e4steam_minecraft.offlineModeEnabled")
+                            );
+                            Mirror.sendSuccessToSource(
+                                    ctx.getSource(),
+                                    Mirror.withStyle(
+                                            Mirror.translatable("text.e4steam_minecraft.offlineModeNote"),
+                                            it -> it.withColor(net.minecraft.ChatFormatting.GRAY)
+                                    )
+                            );
+                            return 1;
+                        }))
         );
     }
 

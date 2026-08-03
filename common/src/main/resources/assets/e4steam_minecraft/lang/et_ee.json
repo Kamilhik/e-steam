@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Steami fuajee suleti või sul pole enam juurdepääsu",
   "text.e4steam_minecraft.joinExpired": "See Steami kutse pole enam aktiivne",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Lõpeta või tühista praegune serveriühendus enne Steami kutse vastuvõtmist",
-  "text.e4steam_minecraft.joinCancelPending": "Steam tühistab veel eelmist katset. Proovi peagi uuesti või välju korraks mitmikmängust ja ava see uuesti."
+  "text.e4steam_minecraft.joinCancelPending": "Steam tühistab veel eelmist katset. Proovi peagi uuesti või välju korraks mitmikmängust ja ava see uuesti.",
+  "text.e4steam_minecraft.onlineMode": "Võrgurežiim",
+  "text.e4steam_minecraft.onlineModeHelp": "Luba ilma Minecrafti litsentsita mängijatel liituda. Võrguühenduseta mängijad saavad nimepõhised kontod ja neil pole nahasid.",
+  "text.e4steam_minecraft.offlineModeEnabled": "Võrguühenduseta režiim on lubatud",
+  "text.e4steam_minecraft.offlineModeDisabled": "Võrguühenduseta režiim on keelatud",
+  "text.e4steam_minecraft.offlineModeNote": "Kehtib ainult uute ühenduste kohta"
 }

@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "لوبي Steam تله ديتوتوڤ اتاو اندا تيدق لاݢي ممڤوڽاءي اکسيس",
   "text.e4steam_minecraft.joinExpired": "جمڤوتن Steam اين تيدق لاݢي اکتيف",
   "text.e4steam_minecraft.joinAlreadyConnecting": "سلسايکن اتاو بتلکن سمبوڠن ڤلاين سماس سبلوم منريما جمڤوتن Steam",
-  "text.e4steam_minecraft.joinCancelPending": "Steam ماسيه ممبتلکن ڤرچوباءن سبلومڽ. چوبا لاݢي سبنتر لاݢي، اتاو کلوار درڤد مينو بربيلڠ ڤماءين سکتيک دان بوک سمولا."
+  "text.e4steam_minecraft.joinCancelPending": "Steam ماسيه ممبتلکن ڤرچوباءن سبلومڽ. چوبا لاݢي سبنتر لاݢي، اتاو کلوار درڤد مينو بربيلڠ ڤماءين سکتيک دان بوک سمولا.",
+  "text.e4steam_minecraft.onlineMode": "مود دالم تاليان",
+  "text.e4steam_minecraft.onlineModeHelp": "بنرکن ڤماين تنڤا لسنس Minecraft مڽرتاي. ڤماين لوار تاليان مڠݢوناکن اکاون برداسرکن نام دان تيدق اد سکين.",
+  "text.e4steam_minecraft.offlineModeEnabled": "مود لوار تاليان دياکتيۏکن",
+  "text.e4steam_minecraft.offlineModeDisabled": "مود لوار تاليان دڽاهاکتيۏکن",
+  "text.e4steam_minecraft.offlineModeNote": "هاڽ برلاکو اونتوق سمبوڠن بهارو"
 }

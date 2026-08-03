@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Лобби Steam закрыто или у вас больше нет доступа",
   "text.e4steam_minecraft.joinExpired": "Это приглашение Steam больше не действует",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Завершите или отмените текущее подключение к серверу перед принятием приглашения Steam",
-  "text.e4steam_minecraft.joinCancelPending": "Steam ещё отменяет предыдущую попытку. Повторите чуть позже или ненадолго выйдите из «Сетевой игры» и откройте её снова."
+  "text.e4steam_minecraft.joinCancelPending": "Steam ещё отменяет предыдущую попытку. Повторите чуть позже или ненадолго выйдите из «Сетевой игры» и откройте её снова.",
+  "text.e4steam_minecraft.onlineMode": "Онлайн-режим",
+  "text.e4steam_minecraft.onlineModeHelp": "Разрешить вход игрокам без лицензии Minecraft. Офлайн-игроки получают аккаунты на основе имени и не видят скины.",
+  "text.e4steam_minecraft.offlineModeEnabled": "Офлайн-режим включён",
+  "text.e4steam_minecraft.offlineModeDisabled": "Офлайн-режим выключен",
+  "text.e4steam_minecraft.offlineModeNote": "Применяется только к новым подключениям"
 }

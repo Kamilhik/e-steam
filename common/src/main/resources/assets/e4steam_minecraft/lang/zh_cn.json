@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Steam 大厅已关闭，或你已无权访问",
   "text.e4steam_minecraft.joinExpired": "此 Steam 邀请已失效",
   "text.e4steam_minecraft.joinAlreadyConnecting": "接受 Steam 邀请前，请先完成或取消当前服务器连接",
-  "text.e4steam_minecraft.joinCancelPending": "Steam 仍在取消上一次尝试。请稍后重试，或暂时退出“多人游戏”并重新打开。"
+  "text.e4steam_minecraft.joinCancelPending": "Steam 仍在取消上一次尝试。请稍后重试，或暂时退出“多人游戏”并重新打开。",
+  "text.e4steam_minecraft.onlineMode": "在线模式",
+  "text.e4steam_minecraft.onlineModeHelp": "允许没有 Minecraft 正版的玩家加入。离线玩家使用基于名称的账号，且没有皮肤。",
+  "text.e4steam_minecraft.offlineModeEnabled": "已启用离线模式",
+  "text.e4steam_minecraft.offlineModeDisabled": "已禁用离线模式",
+  "text.e4steam_minecraft.offlineModeNote": "仅对新连接生效"
 }

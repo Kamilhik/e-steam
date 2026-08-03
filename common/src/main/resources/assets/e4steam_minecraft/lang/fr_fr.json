@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Le salon Steam a été fermé ou vous n'y avez plus accès",
   "text.e4steam_minecraft.joinExpired": "Cette invitation Steam n'est plus active",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Terminez ou annulez la connexion au serveur en cours avant d'accepter une invitation Steam",
-  "text.e4steam_minecraft.joinCancelPending": "Steam annule encore la tentative précédente. Réessayez bientôt, ou quittez brièvement le menu Multijoueur puis rouvrez-le."
+  "text.e4steam_minecraft.joinCancelPending": "Steam annule encore la tentative précédente. Réessayez bientôt, ou quittez brièvement le menu Multijoueur puis rouvrez-le.",
+  "text.e4steam_minecraft.onlineMode": "Mode en ligne",
+  "text.e4steam_minecraft.onlineModeHelp": "Autoriser les joueurs sans licence Minecraft à se connecter. Les joueurs hors ligne utilisent un compte basé sur le nom et n'ont pas de skins.",
+  "text.e4steam_minecraft.offlineModeEnabled": "Mode hors ligne activé",
+  "text.e4steam_minecraft.offlineModeDisabled": "Mode hors ligne désactivé",
+  "text.e4steam_minecraft.offlineModeNote": "S'applique uniquement aux nouvelles connexions"
 }

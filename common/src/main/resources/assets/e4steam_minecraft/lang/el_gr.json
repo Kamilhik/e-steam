@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Το λόμπι Steam έκλεισε ή δεν έχετε πλέον πρόσβαση",
   "text.e4steam_minecraft.joinExpired": "Αυτή η πρόσκληση Steam δεν είναι πλέον ενεργή",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Ολοκληρώστε ή ακυρώστε την τρέχουσα σύνδεση διακομιστή πριν αποδεχτείτε πρόσκληση Steam",
-  "text.e4steam_minecraft.joinCancelPending": "Το Steam ακυρώνει ακόμη την προηγούμενη προσπάθεια. Δοκιμάστε ξανά σύντομα ή βγείτε για λίγο από το Παιχνίδι για πολλούς παίκτες και ανοίξτε το ξανά."
+  "text.e4steam_minecraft.joinCancelPending": "Το Steam ακυρώνει ακόμη την προηγούμενη προσπάθεια. Δοκιμάστε ξανά σύντομα ή βγείτε για λίγο από το Παιχνίδι για πολλούς παίκτες και ανοίξτε το ξανά.",
+  "text.e4steam_minecraft.onlineMode": "Λειτουργία σύνδεσης",
+  "text.e4steam_minecraft.onlineModeHelp": "Επιτρέπει τη σύνδεση παικτών χωρίς άδεια Minecraft. Οι εκτός σύνδεσης παίκτες λαμβάνουν λογαριασμούς με βάση το όνομα και δεν έχουν skins.",
+  "text.e4steam_minecraft.offlineModeEnabled": "Η λειτουργία εκτός σύνδεσης ενεργοποιήθηκε",
+  "text.e4steam_minecraft.offlineModeDisabled": "Η λειτουργία εκτός σύνδεσης απενεργοποιήθηκε",
+  "text.e4steam_minecraft.offlineModeNote": "Ισχύει μόνο για νέες συνδέσεις"
 }

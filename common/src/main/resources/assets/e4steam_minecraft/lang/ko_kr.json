@@ -47,5 +47,10 @@
   "text.e4steam_minecraft.joinLobbyClosed": "Steam 로비가 닫혔거나 더 이상 접근할 수 없습니다",
   "text.e4steam_minecraft.joinExpired": "이 Steam 초대는 더 이상 유효하지 않습니다",
   "text.e4steam_minecraft.joinAlreadyConnecting": "Steam 초대를 받기 전에 현재 서버 연결을 완료하거나 취소하세요",
-  "text.e4steam_minecraft.joinCancelPending": "Steam이 이전 시도를 아직 취소하는 중입니다. 잠시 후 다시 시도하거나 멀티플레이 메뉴를 잠깐 나갔다가 다시 여세요."
+  "text.e4steam_minecraft.joinCancelPending": "Steam이 이전 시도를 아직 취소하는 중입니다. 잠시 후 다시 시도하거나 멀티플레이 메뉴를 잠깐 나갔다가 다시 여세요.",
+  "text.e4steam_minecraft.onlineMode": "온라인 모드",
+  "text.e4steam_minecraft.onlineModeHelp": "Minecraft 라이선스가 없는 플레이어의 접속을 허용합니다. 오프라인 플레이어는 이름 기반 계정을 사용하며 스킨이 없습니다.",
+  "text.e4steam_minecraft.offlineModeEnabled": "오프라인 모드가 활성화되었습니다",
+  "text.e4steam_minecraft.offlineModeDisabled": "오프라인 모드가 비활성화되었습니다",
+  "text.e4steam_minecraft.offlineModeNote": "새로운 연결에만 적용됩니다"
 }
