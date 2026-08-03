@@ -4,15 +4,12 @@ import com.mojang.authlib.GameProfile;
 import link.e4steam.Config;
 import link.e4steam.E4steamClient;
 import link.e4steam.Mirror;
-import link.e4steam.SessionLimits;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserWhiteList;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
@@ -25,8 +22,6 @@ import java.net.SocketAddress;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
-    @Shadow @Final @Mutable protected int maxPlayers;
-
     @Shadow public abstract UserBanList getBans();
 
     @Shadow public abstract UserWhiteList getWhiteList();
@@ -35,8 +30,6 @@ public abstract class PlayerListMixin {
 
     @Inject(method = "/^<init>$/", at = @At("TAIL"))
     void injectListLoads(CallbackInfo ci) {
-        this.maxPlayers = SessionLimits.maxPlayers();
-
         if (Config.INSTANCE.restoreDedicatedCommands.value()) {
             Mirror.setUsingWhitelist(getServer(), (PlayerList) (Object) this, Config.INSTANCE.useWhiteList.value());
             try {

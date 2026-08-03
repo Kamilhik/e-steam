@@ -6,6 +6,19 @@ two-player Steam session.
 
 Legend: ✅ verified · ⏳ not yet manually verified · — unsupported.
 
+## 0.2.1 control run
+
+On 2026-08-03, the final 0.2.1 sources were checked on one representative
+version per loader. Each client entered a single-player world, opened it to
+LAN, initialized Steam App ID 480, and created an e4steam connection.
+
+| Loader | Minecraft | World | LAN and Steam connection |
+| --- | --- | --- | --- |
+| Fabric | 26.2 | ✅ | ✅ |
+| Quilt | 1.20.2 | ✅ | ✅ |
+| Forge | 1.20.2 | ✅ | ✅ |
+| NeoForge | 1.21.1 | ✅ | ✅ |
+
 ## Windows client launch matrix
 
 On 2026-08-01, 99 clean Windows x64 test instances reached Minecraft's main

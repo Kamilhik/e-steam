@@ -10,7 +10,6 @@ import com.codedisaster.steamworks.SteamUtils;
 import com.codedisaster.steamworks.SteamUtilsCallback;
 import link.e4steam.Agnos;
 import link.e4steam.E4steamClient;
-import link.e4steam.SessionLimits;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -1173,7 +1172,7 @@ public final class SteamRuntime {
         long activeHostConnections = bridgeRegistry.count(
                 bridge -> bridge.isHostedBy(registration.owner()) && !bridge.isClosed()
         );
-        if (activeHostConnections >= SessionLimits.maxGuests()) {
+        if (activeHostConnections >= SteamLobbyManager.VANILLA_MAX_GUESTS) {
             sendStandaloneReset(remoteSteamId, key.connectionId());
             return;
         }

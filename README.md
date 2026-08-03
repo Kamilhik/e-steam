@@ -24,7 +24,7 @@
 </div>
 
 > [!IMPORTANT]
-> **e4steam 0.2.0 is the first stable release.** Windows x64 is the primary
+> **e4steam 0.2.1 is the current stable release.** Windows x64 is the primary
 > supported platform. Linux x64 is experimental. Dedicated servers and macOS
 > are not supported. e4steam permanently uses the shared Steam test App ID 480
 > (Spacewar), so unrelated App ID 480 traffic is possible and is filtered.
@@ -93,7 +93,7 @@ shares Minecraft's port. Another UDP mod can use the `voiceChatPort` setting.
 - Windows x64 is primary; Linux x64 is experimental; macOS and 32-bit systems are unsupported.
 - Both players need Steam, e4steam, matching Minecraft versions, and compatible loaders.
 - Some declared version/loader combinations are experimental until manually smoke-tested.
-- The current shared-world limit is 32 players including the host.
+- The shared world uses Minecraft's standard limit of 8 players including the host.
 
 ## Demo
 
@@ -109,7 +109,7 @@ shares Minecraft's port. Another UDP mod can use the `voiceChatPort` setting.
 <summary><h2>🇷🇺 Русская версия</h2></summary>
 
 > [!IMPORTANT]
-> **e4steam 0.2.0 — первый стабильный релиз.** Основная поддерживаемая
+> **e4steam 0.2.1 — текущий стабильный релиз.** Основная поддерживаемая
 > платформа — Windows x64. Linux x64 пока экспериментальный. Выделенные серверы
 > и macOS не поддерживаются. Мод навсегда использует общий тестовый Steam App ID
 > 480 (Spacewar), поэтому посторонний трафик App ID 480 возможен и фильтруется.
@@ -178,7 +178,7 @@ Simple Voice Chat определяется автоматически. Plasmo Vo
 - Windows x64 — основная платформа, Linux x64 экспериментальный; macOS и 32-bit не поддерживаются.
 - Всем нужны Steam, e4steam, одинаковая версия Minecraft и совместимые загрузчики.
 - Непроверенные сочетания версий и загрузчиков считаются экспериментальными.
-- Лимит открытого мира — 32 игрока вместе с хостом.
+- Открытый мир использует стандартный лимит Minecraft: 8 игроков вместе с хостом.
 
 </details>
 

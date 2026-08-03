@@ -9,7 +9,6 @@ import com.codedisaster.steamworks.SteamMatchmakingCallback;
 import com.codedisaster.steamworks.SteamNativeHandle;
 import com.codedisaster.steamworks.SteamResult;
 import link.e4steam.E4steamClient;
-import link.e4steam.SessionLimits;
 import link.e4steam.MinecraftVersion;
 import link.e4steam.Mirror;
 
@@ -21,6 +20,9 @@ import java.util.concurrent.CompletableFuture;
 
 /** Steam lobby, friends, overlay and invite state. Called only by the Steam worker. */
 final class SteamLobbyManager implements AutoCloseable {
+    static final int VANILLA_LOBBY_CAPACITY = 8;
+    static final int VANILLA_MAX_GUESTS = VANILLA_LOBBY_CAPACITY - 1;
+
     private static final String KEY_PROTOCOL = "e4steam_protocol";
     private static final String KEY_MINECRAFT = "e4steam_minecraft";
     private static final String KEY_ENDPOINT = "e4steam_endpoint";
@@ -323,7 +325,7 @@ final class SteamLobbyManager implements AutoCloseable {
         SteamMatchmaking.LobbyType type = requested.accessMode == SteamAccessMode.FRIENDS_ONLY
                 ? SteamMatchmaking.LobbyType.FriendsOnly
                 : SteamMatchmaking.LobbyType.Private;
-        SteamAPICall call = matchmaking.createLobby(type, SessionLimits.maxPlayers());
+        SteamAPICall call = matchmaking.createLobby(type, VANILLA_LOBBY_CAPACITY);
         if (call == null || !call.isValid()) {
             pendingHost = null;
             requested.result.completeExceptionally(new IOException("Steam rejected the lobby creation request"));
