@@ -9,8 +9,6 @@ belong to this fork and are independent of upstream e4mc releases.
 
 - Removed the experimental 32-player expansion and restored Minecraft's
   standard integrated-world limit of 8 players including the host.
-- Removed the Steam Friends button from the Multiplayer screen while keeping
-  Steam invitations and direct e4steam connections available.
 - Rechecked world loading and Steam LAN sharing on Fabric 26.2, Quilt 1.20.2,
   Forge 1.20.2, and NeoForge 1.21.1.
 
@@ -18,8 +16,6 @@ belong to this fork and are independent of upstream e4mc releases.
 
 - Удалено экспериментальное расширение до 32 игроков и возвращён стандартный
   лимит Minecraft: 8 игроков вместе с хостом.
-- Убрана кнопка «Друзья Steam» с экрана сетевой игры; приглашения Steam и
-  прямое подключение e4steam продолжают работать.
 - Повторно проверены загрузка мира и открытие Steam-LAN на Fabric 26.2,
   Quilt 1.20.2, Forge 1.20.2 и NeoForge 1.21.1.
 
