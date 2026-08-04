@@ -226,6 +226,11 @@ tasks.register("releaseJars") {
                             "${variant.label} does not enable authenticated offline-launcher login"
                     )
                 }
+                if (!mixinsConfig.contains("MultiplayerOptionsScreenMixin")) {
+                    throw new GradleException(
+                            "${variant.label} does not support the Minecraft 26.x multiplayer options screen"
+                    )
+                }
                 if (zip.getEntry("assets/e4steam_minecraft/icon.png") == null) {
                     throw new GradleException("${variant.label} is missing the e4steam mod icon")
                 }
@@ -247,6 +252,11 @@ tasks.register("releaseJars") {
                 if (zip.getEntry("link/e4steam/mixin/ServerLoginPacketListenerImplMixin.class") == null) {
                     throw new GradleException(
                             "${variant.label} is missing authenticated offline-launcher support"
+                    )
+                }
+                if (zip.getEntry("link/e4steam/mixin/MultiplayerOptionsScreenMixin.class") == null) {
+                    throw new GradleException(
+                            "${variant.label} is missing the Minecraft 26.x LAN GUI compatibility mixin"
                     )
                 }
                 def stream = new DataInputStream(zip.getInputStream(classEntry))

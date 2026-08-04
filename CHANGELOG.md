@@ -18,6 +18,8 @@ belong to this fork and are independent of upstream e4mc releases.
 - Added periodic acceptance for authenticated lobby peers and Steam Networking
   Sockets diagnostics to make session establishment reliable even when the
   asynchronous session-request callback is delayed.
+- Restored the e4steam access selector on Minecraft 26.x, where the old
+  `ShareToLanScreen` was replaced by `MultiplayerOptionsScreen`.
 
 ### Русский
 
@@ -30,6 +32,8 @@ belong to this fork and are independent of upstream e4mc releases.
   транспортом отклонялись проверкой совместимости.
 - Добавлены периодическое принятие сессий проверенных участников lobby и
   диагностика Steam Networking Sockets на случай задержки callback-запроса.
+- Возвращён выбор режима доступа e4steam на Minecraft 26.x, где старый
+  `ShareToLanScreen` заменён новым `MultiplayerOptionsScreen`.
 
 ## 0.2.1 - 2026-08-03
 

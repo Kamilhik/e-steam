@@ -12,6 +12,7 @@
     "BanPlayerCommandsMixin",
     "ConnectScreenMixin",
     "JoinMultiplayerScreenMixin",
+    "MultiplayerOptionsScreenMixin",
     "PardonCommandMixin",
     "PauseScreenMixin",
     "ServerLoginPacketListenerImplMixin",
