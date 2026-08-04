@@ -3,6 +3,34 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
+## 0.2.2 - 2026-08-04
+
+### English
+
+- Added offline-launcher profile support for Steam guests. Mojang session
+  authentication is bypassed only for an already authenticated Steam bridge;
+  Minecraft keeps its normal offline profile through login and configuration.
+- Replaced the deprecated `ISteamNetworking` transport with
+  `ISteamNetworkingMessages`, the packet-oriented API built on Steam
+  Networking Sockets.
+- Raised the wire and lobby protocol version to 3 so legacy-transport clients
+  fail compatibility checks instead of attempting an incompatible session.
+- Added periodic acceptance for authenticated lobby peers and Steam Networking
+  Sockets diagnostics to make session establishment reliable even when the
+  asynchronous session-request callback is delayed.
+
+### Русский
+
+- Добавлена поддержка офлайн-профилей лаунчеров для гостей Steam. Проверка
+  сессии Mojang отключается только для уже авторизованного Steam bridge, а
+  профиль Minecraft сохраняется штатным при переходе login/configuration.
+- Устаревший транспорт `ISteamNetworking` заменён на
+  `ISteamNetworkingMessages` — пакетный API поверх Steam Networking Sockets.
+- Версия сетевого и lobby-протокола повышена до 3, чтобы клиенты со старым
+  транспортом отклонялись проверкой совместимости.
+- Добавлены периодическое принятие сессий проверенных участников lobby и
+  диагностика Steam Networking Sockets на случай задержки callback-запроса.
+
 ## 0.2.1 - 2026-08-03
 
 ### English

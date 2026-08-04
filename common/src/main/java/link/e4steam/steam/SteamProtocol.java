@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 final class SteamProtocol {
     static final int MAGIC = 0x45345354; // E4ST
-    static final byte VERSION = 2;
+    static final byte VERSION = 3;
     static final byte OPEN = 1;
     static final byte DATA = 2;
     static final byte FIN = 3;
@@ -15,7 +15,7 @@ final class SteamProtocol {
 
     static final int DATA_CHUNK_SIZE = 32 * 1024;
     static final int HEADER_SIZE = Integer.BYTES + Byte.BYTES + Byte.BYTES + Short.BYTES + Integer.BYTES;
-    // Steam's legacy unreliable P2P mode accepts packets up to 1200 bytes,
+    // Keep voice datagrams within a conservative single-packet payload,
     // including this protocol's header.
     static final int MAX_DATAGRAM_SIZE = 1_200 - HEADER_SIZE;
     static final int MAX_PACKET_SIZE = HEADER_SIZE + Math.max(DATA_CHUNK_SIZE, MAX_DATAGRAM_SIZE);

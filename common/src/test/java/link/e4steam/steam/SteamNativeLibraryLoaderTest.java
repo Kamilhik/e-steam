@@ -1,6 +1,7 @@
 package link.e4steam.steam;
 
 import com.codedisaster.steamworks.SteamAPI;
+import com.sun.jna.NativeLibrary;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -52,5 +53,39 @@ class SteamNativeLibraryLoaderTest {
 
         SteamNativeLibraryLoader loader = new SteamNativeLibraryLoader();
         assertTrue(SteamAPI.loadLibraries(loader), loader.failureDescription());
+
+        NativeLibrary steamApi = NativeLibrary.getInstance(loader.steamApiPath().toString());
+        steamApi.getFunction("SteamAPI_SteamNetworkingMessages_SteamAPI_v002");
+        steamApi.getFunction("SteamAPI_SteamNetworkingUtils_SteamAPI_v004");
+        steamApi.getFunction("SteamAPI_ISteamNetworkingMessages_SendMessageToUser");
+        steamApi.getFunction("SteamAPI_ISteamNetworkingMessages_ReceiveMessagesOnChannel");
+        steamApi.getFunction("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionRequest");
+        steamApi.getFunction("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionFailed");
+        steamApi.getFunction("SteamAPI_SteamNetworkingMessage_t_Release");
+    }
+
+    @Test
+    void bindsNetworkingMessagesWhenSteamIsAvailable() throws Exception {
+        SteamNativeLibraryLoader loader = new SteamNativeLibraryLoader();
+        assertTrue(SteamAPI.loadLibraries(loader), loader.failureDescription());
+        assumeTrue(SteamAPI.init());
+
+        try {
+            SteamNetworkingMessagesTransport transport = SteamNetworkingMessagesTransport.open(
+                    loader.steamApiPath(),
+                    new SteamNetworkingMessagesTransport.SessionListener() {
+                        @Override
+                        public void onSessionRequest(long remoteSteamId) {
+                        }
+
+                        @Override
+                        public void onSessionFailed(long remoteSteamId, int endReason, String detail) {
+                        }
+                    }
+            );
+            transport.close();
+        } finally {
+            SteamAPI.shutdown();
+        }
     }
 }

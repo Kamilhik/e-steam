@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.LongConsumer;
 
 /** Steam lobby, friends, overlay and invite state. Called only by the Steam worker. */
 final class SteamLobbyManager implements AutoCloseable {
@@ -26,7 +27,7 @@ final class SteamLobbyManager implements AutoCloseable {
     private static final String KEY_PROTOCOL = "e4steam_protocol";
     private static final String KEY_MINECRAFT = "e4steam_minecraft";
     private static final String KEY_ENDPOINT = "e4steam_endpoint";
-    private static final String PROTOCOL_VERSION = "2";
+    private static final String PROTOCOL_VERSION = Byte.toString(SteamProtocol.VERSION);
     private static final String LOBBY_CONNECT_PREFIX = "e4steam-lobby:";
     private static final long GUEST_JOIN_TIMEOUT_MILLIS = 30_000;
 
@@ -208,6 +209,32 @@ final class SteamLobbyManager implements AutoCloseable {
             return true;
         }
         return hostLobby != null && isAllowedHostPeer(hostLobby, remoteSteamId);
+    }
+
+    void forEachKnownSessionPeer(LongConsumer consumer) {
+        GuestLobby currentGuest = guestLobby;
+        if (currentGuest != null && currentGuest.hostSteamId != 0) {
+            consumer.accept(currentGuest.hostSteamId);
+        }
+
+        HostLobby currentHost = hostLobby;
+        if (currentHost == null) {
+            return;
+        }
+        SteamID lobbyId = SteamID.createFromNativeHandle(currentHost.lobbyId);
+        int memberCount = matchmaking.getNumLobbyMembers(lobbyId);
+        for (int index = 0; index < memberCount; index++) {
+            SteamID member = matchmaking.getLobbyMemberByIndex(lobbyId, index);
+            if (member == null) {
+                continue;
+            }
+            long remoteSteamId = SteamNativeHandle.getNativeHandle(member);
+            if (remoteSteamId != 0
+                    && remoteSteamId != runtime.steamIdValue()
+                    && friends.getFriendRelationship(member) == SteamFriends.FriendRelationship.Friend) {
+                consumer.accept(remoteSteamId);
+            }
+        }
     }
 
     boolean keepsRuntimeAlive() {

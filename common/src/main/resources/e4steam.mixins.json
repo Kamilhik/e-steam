@@ -14,6 +14,7 @@
     "JoinMultiplayerScreenMixin",
     "PardonCommandMixin",
     "PauseScreenMixin",
+    "ServerLoginPacketListenerImplMixin",
     "ServerConnectionListenerMixin",
     "ShareToLanScreenMixin",
     "WhitelistCommandMixin",

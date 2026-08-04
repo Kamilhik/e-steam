@@ -85,6 +85,10 @@ final class SteamNativeLibraryLoader implements SteamLibraryLoader {
         return (failedLibrary == null ? "native library" : failedLibrary) + " (" + detail + ")";
     }
 
+    Path steamApiPath() {
+        return libraries.get("steam_api");
+    }
+
     static NativeNames nativeNames(String osName, String architecture) throws IOException {
         String os = osName.toLowerCase(Locale.ROOT);
         String arch = architecture.toLowerCase(Locale.ROOT);

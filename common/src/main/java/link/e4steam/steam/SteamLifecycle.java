@@ -1,10 +1,12 @@
 package link.e4steam.steam;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 /** Restartable ownership of the process-global Steam API. */
 final class SteamLifecycle implements AutoCloseable {
     private final SteamApi api;
+    private SteamNativeLibraryLoader nativeLoader;
     private boolean librariesLoaded;
     private boolean initialized;
 
@@ -17,11 +19,11 @@ final class SteamLifecycle implements AutoCloseable {
             return;
         }
         if (!librariesLoaded) {
-            SteamNativeLibraryLoader loader = new SteamNativeLibraryLoader();
-            if (!api.loadLibraries(loader)) {
+            nativeLoader = new SteamNativeLibraryLoader();
+            if (!api.loadLibraries(nativeLoader)) {
                 throw new IOException(
-                        "Could not load Steam native libraries: " + loader.failureDescription(),
-                        loader.failureCause()
+                        "Could not load Steam native libraries: " + nativeLoader.failureDescription(),
+                        nativeLoader.failureCause()
                 );
             }
             librariesLoaded = true;
@@ -51,6 +53,13 @@ final class SteamLifecycle implements AutoCloseable {
 
     boolean isRunning() {
         return initialized && api.isSteamRunning();
+    }
+
+    Path steamApiPath() {
+        if (!initialized || nativeLoader == null) {
+            throw new IllegalStateException("Steam lifecycle is not running");
+        }
+        return nativeLoader.steamApiPath();
     }
 
     @Override

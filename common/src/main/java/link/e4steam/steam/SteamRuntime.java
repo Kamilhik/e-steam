@@ -2,8 +2,7 @@ package link.e4steam.steam;
 
 import com.codedisaster.steamworks.SteamID;
 import com.codedisaster.steamworks.SteamNativeHandle;
-import com.codedisaster.steamworks.SteamNetworking;
-import com.codedisaster.steamworks.SteamNetworkingCallback;
+import com.codedisaster.steamworks.SteamResult;
 import com.codedisaster.steamworks.SteamUser;
 import com.codedisaster.steamworks.SteamUserCallback;
 import com.codedisaster.steamworks.SteamUtils;
@@ -14,6 +13,7 @@ import link.e4steam.E4steamClient;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,6 +59,7 @@ public final class SteamRuntime {
     private static final Duration START_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration STEAM_TASK_TIMEOUT = Duration.ofSeconds(10);
     private static final long RUNTIME_IDLE_SHUTDOWN_MILLIS = 1_000;
+    private static final long KNOWN_PEER_ACCEPT_INTERVAL_MILLIS = 100;
 
     private static final SteamRuntime INSTANCE = new SteamRuntime(new SteamworksApi(), true);
 
@@ -83,12 +84,13 @@ public final class SteamRuntime {
     private volatile long localSteamId;
     private volatile Thread workerThread;
     private volatile WorkerGeneration generation;
-    private volatile SteamPacketTransport transport;
+    private volatile SteamNetworkingMessagesTransport transport;
     private volatile SteamUser user;
     private volatile SteamUtils utils;
     private volatile SteamLobbyManager lobbyManager;
     private volatile HostRegistration hostRegistration;
     private volatile long nextLoopbackConnectAttemptAtMillis;
+    private long nextKnownPeerAcceptAtMillis;
     private boolean permanentlyShutdown;
     private int activityCount;
 
@@ -163,6 +165,23 @@ public final class SteamRuntime {
 
     long steamIdValue() {
         return localSteamId;
+    }
+
+    /**
+     * Returns the authenticated Steam peer owning this exact Minecraft TCP
+     * connection, or zero for ordinary LAN, unresolved, and stale sockets.
+     */
+    public long authenticatedMinecraftPeer(SocketAddress remoteAddress) {
+        int remotePort = SteamLoopbackAuthentication.loopbackPort(remoteAddress);
+        if (remotePort < 0 || hostRegistration == null || status != Status.RUNNING) {
+            return 0;
+        }
+        for (SteamConnectionBridge bridge : bridgeRegistry.snapshot()) {
+            if (bridge.isHostSide() && !bridge.isClosed() && bridge.localPort() == remotePort) {
+                return bridge.remoteSteamId();
+            }
+        }
+        return 0;
     }
 
     void startHosting(
@@ -623,7 +642,11 @@ public final class SteamRuntime {
                 status = Status.RUNNING;
             }
             currentGeneration.ready.complete(null);
-            E4steamClient.LOGGER.info("Steam P2P initialized as {} using App ID {}", steamId(), APP_ID);
+            E4steamClient.LOGGER.info(
+                    "Steam Networking Messages initialized as {} using App ID {}",
+                    steamId(),
+                    APP_ID
+            );
 
             ByteBuffer sendBuffer = ByteBuffer.allocateDirect(SteamProtocol.MAX_PACKET_SIZE);
             ByteBuffer receiveBuffer = ByteBuffer.allocateDirect(SteamProtocol.MAX_ACCEPTED_STEAM_PACKET_SIZE);
@@ -634,6 +657,7 @@ public final class SteamRuntime {
                 }
                 steamLifecycle.runCallbacks();
                 drainSteamTasks();
+                acceptKnownPeerSessions(System.currentTimeMillis());
                 drainOutbound(sendBuffer);
                 receivePackets(receiveBuffer);
                 cleanupPeerSessions();
@@ -694,7 +718,7 @@ public final class SteamRuntime {
                 }
             }
 
-            SteamPacketTransport currentTransport = transport;
+            SteamNetworkingMessagesTransport currentTransport = transport;
             transport = null;
             if (currentTransport != null) {
                 try {
@@ -885,66 +909,77 @@ public final class SteamRuntime {
 
         localSteamId = SteamNativeHandle.getNativeHandle(id);
         user = createdUser;
-        SteamNetworking createdNetworking = new SteamNetworking(new SteamNetworkingCallback() {
-            @Override
-            public void onP2PSessionRequest(SteamID remote) {
-                SteamPacketTransport current = transport;
-                if (current == null) {
-                    return;
-                }
-                long remoteId = SteamNativeHandle.getNativeHandle(remote);
-                synchronized (peerSessionLock) {
-                    SteamLobbyManager currentSocial = lobbyManager;
-                    if (!hasBridgeForRemote(remoteId)
-                            && (currentSocial == null || !currentSocial.mayAcceptPeer(remoteId))) {
-                        current.closePeer(remoteId);
-                        return;
-                    }
-                    if (!hasBridgeForRemote(remoteId) && pendingPeers.size() >= MAX_PENDING_PEERS) {
-                        current.closePeer(remoteId);
-                        return;
-                    }
-                    if (!current.accept(remoteId)) {
-                        current.closePeer(remoteId);
-                        return;
-                    }
-                    if (!hasBridgeForRemote(remoteId)) {
-                        pendingPeers.put(
-                                remoteId,
-                                System.currentTimeMillis() + PENDING_PEER_TIMEOUT_MILLIS
+        transport = SteamNetworkingMessagesTransport.open(
+                steamLifecycle.steamApiPath(),
+                new SteamNetworkingMessagesTransport.SessionListener() {
+                    @Override
+                    public void onSessionRequest(long remoteId) {
+                        E4steamClient.LOGGER.debug(
+                                "Steam Networking Messages session requested by {}",
+                                Long.toUnsignedString(remoteId)
                         );
+                        SteamNetworkingMessagesTransport current = transport;
+                        if (current == null) {
+                            return;
+                        }
+                        synchronized (peerSessionLock) {
+                            SteamLobbyManager currentSocial = lobbyManager;
+                            if (!hasBridgeForRemote(remoteId)
+                                    && (currentSocial == null || !currentSocial.mayAcceptPeer(remoteId))) {
+                                current.closePeer(remoteId);
+                                return;
+                            }
+                            if (!hasBridgeForRemote(remoteId) && pendingPeers.size() >= MAX_PENDING_PEERS) {
+                                current.closePeer(remoteId);
+                                return;
+                            }
+                            if (!current.accept(remoteId)) {
+                                current.closePeer(remoteId);
+                                return;
+                            }
+                            if (!hasBridgeForRemote(remoteId)) {
+                                pendingPeers.put(
+                                        remoteId,
+                                        System.currentTimeMillis() + PENDING_PEER_TIMEOUT_MILLIS
+                                );
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onSessionFailed(long remoteId, int endReason, String detail) {
+                        if (detail.isBlank()) {
+                            E4steamClient.LOGGER.warn(
+                                    "Steam Networking Messages session with {} failed (reason {})",
+                                    Long.toUnsignedString(remoteId),
+                                    endReason
+                            );
+                        } else {
+                            E4steamClient.LOGGER.warn(
+                                    "Steam Networking Messages session with {} failed (reason {}): {}",
+                                    Long.toUnsignedString(remoteId),
+                                    endReason,
+                                    detail
+                            );
+                        }
+                        ArrayList<SteamConnectionBridge> failedBridges;
+                        synchronized (peerSessionLock) {
+                            pendingPeers.remove(remoteId);
+                            idleSessionDeadlines.remove(remoteId);
+                            failedBridges = new ArrayList<>(bridgeRegistry.snapshot().stream()
+                                    .filter(bridge -> bridge.remoteSteamId() == remoteId)
+                                    .toList());
+                        }
+                        SteamNetworkingMessagesTransport current = transport;
+                        if (current != null) {
+                            current.closePeer(remoteId);
+                        }
+                        for (SteamConnectionBridge bridge : failedBridges) {
+                            bridge.close(false);
+                        }
                     }
                 }
-            }
-
-            @Override
-            public void onP2PSessionConnectFail(
-                    SteamID remote,
-                    SteamNetworking.P2PSessionError error
-            ) {
-                long remoteId = SteamNativeHandle.getNativeHandle(remote);
-                E4steamClient.LOGGER.warn(
-                        "Steam P2P connection to {} failed: {}",
-                        Long.toUnsignedString(remoteId),
-                        error
-                );
-                ArrayList<SteamConnectionBridge> failedBridges;
-                synchronized (peerSessionLock) {
-                    pendingPeers.remove(remoteId);
-                    idleSessionDeadlines.remove(remoteId);
-                    failedBridges = new ArrayList<>(bridgeRegistry.snapshot().stream()
-                            .filter(bridge -> bridge.remoteSteamId() == remoteId)
-                            .toList());
-                }
-                for (SteamConnectionBridge bridge : failedBridges) {
-                    bridge.close(false);
-                }
-            }
-        });
-        transport = new SteamPacketTransport(createdNetworking);
-        if (!transport.enableRelayFallback()) {
-            E4steamClient.LOGGER.warn("Steam did not confirm P2P relay fallback, continuing with direct P2P attempts");
-        }
+        );
         lobbyManager = new SteamLobbyManager(this);
     }
 
@@ -1005,7 +1040,7 @@ public final class SteamRuntime {
     }
 
     private void drainOutbound(ByteBuffer buffer) throws Exception {
-        SteamPacketTransport current = Objects.requireNonNull(transport);
+        SteamNetworkingMessagesTransport current = Objects.requireNonNull(transport);
         for (int sent = 0; sent < MAX_PACKETS_PER_TICK; sent++) {
             SteamOutboundQueue.Packet<SteamConnectionBridge> packet = outbound.poll();
             if (packet == null) {
@@ -1023,21 +1058,60 @@ public final class SteamRuntime {
 
             buffer.clear();
             buffer.put(packet.payload()).flip();
-            boolean accepted = current.send(
+            int result = current.sendResult(
                     packet.remoteSteamId(),
                     buffer,
                     packet.kind() == SteamOutboundQueue.Kind.DATAGRAM,
                     CHANNEL
             );
+            boolean accepted = result == 1;
             SteamConnectionBridge packetBridge = packet.bridge();
             if (packet.kind() == SteamOutboundQueue.Kind.RESET && packetBridge != null) {
                 packetBridge.markResetSubmitted();
             } else if (accepted && packet.kind() == SteamOutboundQueue.Kind.FIN && packetBridge != null) {
                 packetBridge.markFinSubmitted();
             } else if (!accepted && packetBridge != null && packet.kind() != SteamOutboundQueue.Kind.DATAGRAM) {
+                E4steamClient.LOGGER.warn(
+                        "Steam Networking Messages send to {} failed for {}: {} ({})",
+                        Long.toUnsignedString(packet.remoteSteamId()),
+                        packet.kind(),
+                        SteamResult.byValue(result),
+                        result
+                );
                 packetBridge.close(false);
             }
         }
+    }
+
+    private void acceptKnownPeerSessions(long now) {
+        if (now < nextKnownPeerAcceptAtMillis) {
+            return;
+        }
+        nextKnownPeerAcceptAtMillis = now + KNOWN_PEER_ACCEPT_INTERVAL_MILLIS;
+        SteamLobbyManager currentSocial = lobbyManager;
+        SteamNetworkingMessagesTransport currentTransport = transport;
+        if (currentSocial == null || currentTransport == null) {
+            return;
+        }
+        currentSocial.forEachKnownSessionPeer(remoteSteamId -> {
+            synchronized (peerSessionLock) {
+                if (hasBridgeForRemote(remoteSteamId)
+                        || pendingPeers.containsKey(remoteSteamId)
+                        || pendingPeers.size() >= MAX_PENDING_PEERS) {
+                    return;
+                }
+                if (currentTransport.accept(remoteSteamId)) {
+                    pendingPeers.put(
+                            remoteSteamId,
+                            System.currentTimeMillis() + PENDING_PEER_TIMEOUT_MILLIS
+                    );
+                    E4steamClient.LOGGER.debug(
+                            "Accepted Steam session for known lobby peer {}",
+                            Long.toUnsignedString(remoteSteamId)
+                    );
+                }
+            }
+        });
     }
 
     private void clearOutbound() {
@@ -1064,7 +1138,7 @@ public final class SteamRuntime {
     }
 
     private void receivePackets(ByteBuffer buffer) throws Exception {
-        SteamPacketTransport current = Objects.requireNonNull(transport);
+        SteamNetworkingMessagesTransport current = Objects.requireNonNull(transport);
         for (int received = 0; received < MAX_PACKETS_PER_TICK; received++) {
             int size = current.availablePacketSize(CHANNEL);
             if (size == 0) {
@@ -1076,13 +1150,16 @@ public final class SteamRuntime {
             }
 
             buffer.clear();
-            SteamPacketTransport.Received packet = current.receive(buffer, CHANNEL);
+            SteamNetworkingMessagesTransport.Received packet = current.receive(buffer, CHANNEL);
             int read = packet.size();
             if (read <= 0) {
                 continue;
             }
             if (read > SteamProtocol.MAX_PACKET_SIZE) {
                 continue; // Foreign App ID 480 traffic; consume and ignore it.
+            }
+            if (packet.remoteSteamId() == 0) {
+                continue; // Steam API peers must have an authenticated Steam identity.
             }
 
             buffer.position(0);
@@ -1344,7 +1421,7 @@ public final class SteamRuntime {
     }
 
     private boolean hasQueuedSteamPackets(long remoteSteamId) {
-        SteamPacketTransport current = transport;
+        SteamNetworkingMessagesTransport current = transport;
         if (current == null) {
             return false;
         }
@@ -1352,7 +1429,7 @@ public final class SteamRuntime {
     }
 
     private void closeSteamSession(long remoteSteamId) {
-        SteamPacketTransport current = transport;
+        SteamNetworkingMessagesTransport current = transport;
         if (current != null) {
             current.closePeer(remoteSteamId);
         }

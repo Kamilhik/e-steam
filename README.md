@@ -35,6 +35,11 @@ forwarding or a public IP. Both players need the mod and a signed-in Steam
 client. Minecraft TCP traffic and supported voice-chat UDP traffic travel over
 Steam P2P or Valve relays.
 
+Offline Minecraft launcher profiles are supported for Steam connections. The
+host authenticates each guest through the authorized Steam bridge, while
+Minecraft creates the guest profile using its normal offline-mode rules. Steam
+itself must still be running and signed in on every computer.
+
 ## Which file should I download?
 
 | Minecraft | Loader | File name contains | Extra dependency |
@@ -119,6 +124,11 @@ e4steam позволяет открыть одиночный мир Minecraft д
 портов и белого IP. Мод и запущенный Steam нужны у всех игроков. TCP-трафик
 Minecraft и UDP-трафик поддерживаемых голосовых модов передаются через Steam P2P
 или ретрансляторы Valve.
+
+Офлайн-профили Minecraft-лаунчеров поддерживаются для подключений через Steam.
+Хост проверяет гостя по авторизованному Steam bridge, а Minecraft создаёт
+обычный офлайн UUID по своим штатным правилам. Сам Steam всё равно должен быть
+запущен, и на каждом компьютере должен быть выполнен вход в аккаунт Steam.
 
 ## Какой файл скачивать
 

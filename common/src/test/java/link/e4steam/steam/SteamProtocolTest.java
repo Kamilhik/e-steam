@@ -40,6 +40,10 @@ class SteamProtocolTest {
         valid[0] ^= 0x01;
         assertNull(SteamProtocol.decode(ByteBuffer.wrap(valid)));
 
+        byte[] legacyTransport = SteamProtocol.encodeFin(5);
+        legacyTransport[Integer.BYTES] = 2;
+        assertNull(SteamProtocol.decode(ByteBuffer.wrap(legacyTransport)));
+
         byte[] zeroId = SteamProtocol.encodeFin(5);
         ByteBuffer.wrap(zeroId).putInt(SteamProtocol.HEADER_SIZE - Integer.BYTES, 0);
         assertNull(SteamProtocol.decode(ByteBuffer.wrap(zeroId)));

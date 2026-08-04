@@ -36,6 +36,16 @@ The machine-readable local results are generated in
 `build/client-compatibility.json`. Minecraft 26.x uses the modern
 Fabric/Quilt artifact.
 
+## Offline launcher profiles
+
+Steam guest connections support Minecraft offline-mode launcher profiles. The
+Mojang session check is skipped only for the exact loopback socket belonging
+to an authenticated and authorized Steam bridge. Ordinary LAN sockets keep
+Minecraft's normal authentication behavior. Minecraft creates the guest's
+profile with its standard offline-mode rules; e4steam does not replace the
+profile during the login/configuration transition. Steam must remain online
+and signed in.
+
 ## Windows host/guest multiplayer matrix
 
 The maintainer manually reconfirmed the supported multiplayer flow on
