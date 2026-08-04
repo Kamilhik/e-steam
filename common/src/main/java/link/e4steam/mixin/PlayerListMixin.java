@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
@@ -67,6 +68,12 @@ public abstract class PlayerListMixin {
         if (steamId == 0) {
             return;
         }
-        ((GameProfile) gameProfile).setId(SteamRuntime.uuidForSteamId(steamId));
+        try {
+            Field idField = gameProfile.getClass().getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(gameProfile, SteamRuntime.uuidForSteamId(steamId));
+        } catch (Exception e) {
+            E4steamClient.LOGGER.warn("Could not override offline UUID", e);
+        }
     }
 }
