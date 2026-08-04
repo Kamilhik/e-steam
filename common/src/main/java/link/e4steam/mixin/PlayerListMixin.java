@@ -1,9 +1,11 @@
 package link.e4steam.mixin;
 
 import com.mojang.authlib.GameProfile;
+import link.e4steam.Agnos;
 import link.e4steam.Config;
 import link.e4steam.E4steamClient;
 import link.e4steam.Mirror;
+import link.e4steam.steam.SteamRuntime;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
@@ -18,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 @Mixin(PlayerList.class)
@@ -50,5 +53,20 @@ public abstract class PlayerListMixin {
         if (Mirror.isSingleplayerOwnerObj(getServer(), gameProfile)) {
             cir.setReturnValue(null);
         }
+    }
+
+    @Inject(method = "/^(canPlayerLogin|method_14586|checkCanJoin|m_6418_)$/", at = @At("HEAD"))
+    public void overrideOfflineUuid(SocketAddress socketAddress, @Coerce Object gameProfile, CallbackInfoReturnable<Component> cir) {
+        if (!Agnos.isClient() || !Config.INSTANCE.offlineMode.value()) {
+            return;
+        }
+        if (!(socketAddress instanceof InetSocketAddress inet)) {
+            return;
+        }
+        long steamId = SteamRuntime.get().steamIdForBridgePort(inet.getPort());
+        if (steamId == 0) {
+            return;
+        }
+        ((GameProfile) gameProfile).setId(SteamRuntime.uuidForSteamId(steamId));
     }
 }

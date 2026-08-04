@@ -165,6 +165,21 @@ public final class SteamRuntime {
         return localSteamId;
     }
 
+    public long steamIdForBridgePort(int localPort) {
+        for (SteamConnectionBridge bridge : bridgeRegistry.snapshot()) {
+            if (bridge.isHostSide() && bridge.localPort() == localPort) {
+                return bridge.remoteSteamId();
+            }
+        }
+        return 0;
+    }
+
+    public static java.util.UUID uuidForSteamId(long steamId) {
+        return java.util.UUID.nameUUIDFromBytes(
+                ("e4steam:" + Long.toUnsignedString(steamId)).getBytes(java.nio.charset.StandardCharsets.UTF_8)
+        );
+    }
+
     void startHosting(
             SteamSession owner,
             int localPort,
