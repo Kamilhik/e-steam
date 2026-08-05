@@ -80,7 +80,7 @@ shares Minecraft's port. Another UDP mod can use the `voiceChatPort` setting.
 
 - Confirm both players are Steam friends, online, and using the same e4steam release.
 - Confirm both use the same Minecraft version and compatible loaders.
-- Start the launcher through Steam and check **Shift + Tab**.
+- Make sure the Steam desktop client is running and signed in, then restart Minecraft.
 - Ask the host to close and reopen the Steam connection, then send a new invite.
 - For a friends-only lobby, copy the green e4steam address as a fallback.
 - Restart Steam if Spacewar presence or the overlay is stuck.
@@ -149,7 +149,6 @@ Minecraft и UDP-трафик поддерживаемых голосовых м
 4. Установите одинаковый релиз e4steam всем игрокам.
 5. Запустите Steam и войдите в аккаунт до запуска Minecraft.
 
-
 ## Как играть
 
 1. Откройте одиночный мир.
@@ -164,7 +163,7 @@ Simple Voice Chat определяется автоматически. Plasmo Vo
 
 - Проверьте, что вы друзья в Steam, оба онлайн и используете одинаковый релиз e4steam.
 - Проверьте совпадение версии Minecraft и совместимость загрузчиков.
-- Запустите лаунчер через Steam и проверьте **Shift + Tab**.
+- Убедитесь, что клиент Steam запущен и выполнен вход, затем перезапустите Minecraft.
 - Закройте соединение, откройте его заново и отправьте новое приглашение.
 - В режиме для друзей можно скопировать зелёный адрес как запасной вариант.
 - Перезапустите Steam, если статус Spacewar или оверлей завис.
