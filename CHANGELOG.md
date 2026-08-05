@@ -3,7 +3,7 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
-## 0.2.2 - 2026-08-04
+## 0.2.2 - 2026-08-05
 
 ### English
 
@@ -20,6 +20,16 @@ belong to this fork and are independent of upstream e4mc releases.
   asynchronous session-request callback is delayed.
 - Restored the e4steam access selector on Minecraft 26.x, where the old
   `ShareToLanScreen` was replaced by `MultiplayerOptionsScreen`.
+- Steam lobby creation now retries temporary network failures, improving
+  startup on slow and VPN-routed connections.
+- Fixed immediate guest disconnects and infinite falling during world loading
+  by preserving reliable packet order, pacing bursts, and expanding the
+  bounded localhost buffer.
+- Restored the native Steam friends invitation dialog.
+- Fixed missing Steamworks compatibility classes on Forge 1.18.1.
+- Fixed the LAN configuration crash and restored the e4steam access selector
+  on Fabric and Quilt 1.21.11.
+- Removed the temporary movement lock after joining a world.
 
 ### Русский
 
@@ -34,6 +44,16 @@ belong to this fork and are independent of upstream e4mc releases.
   диагностика Steam Networking Sockets на случай задержки callback-запроса.
 - Возвращён выбор режима доступа e4steam на Minecraft 26.x, где старый
   `ShareToLanScreen` заменён новым `MultiplayerOptionsScreen`.
+- Создание лобби Steam теперь повторяется при временных сетевых ошибках, что
+  повышает надёжность запуска через медленные соединения и VPN.
+- Исправлены мгновенные отключения гостей и бесконечное падение при загрузке
+  мира: надёжные пакеты сохраняют порядок, обрабатываются равномерными
+  порциями, а ограниченный локальный буфер увеличен.
+- Возвращено нативное окно приглашения друзей Steam.
+- Исправлены отсутствующие классы совместимости Steamworks на Forge 1.18.1.
+- Исправлен вылет меню открытия мира для сети и возвращён выбор режима доступа
+  e4steam на Fabric и Quilt 1.21.11.
+- Убрана временная блокировка движения после подключения к миру.
 
 ## 0.2.1 - 2026-08-03
 

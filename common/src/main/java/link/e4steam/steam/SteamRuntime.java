@@ -47,7 +47,13 @@ public final class SteamRuntime {
     private static final int MAX_OUTBOUND_DATAGRAM_PACKETS = 384;
     private static final int MAX_OUTBOUND_OPEN_PACKETS = 64;
     private static final int MAX_OUTBOUND_STANDALONE_RESETS = 64;
-    private static final int MAX_PACKETS_PER_TICK = 512;
+    // Yield regularly to the per-bridge localhost writer threads. Draining
+    // hundreds of 32 KiB packets in one worker iteration can fill a bridge's
+    // bounded inbound queue before its writer gets scheduled, which looks
+    // like an infinitely falling player followed by a disconnect.
+    private static final int MAX_PACKETS_PER_TICK = 32;
+    private static final long OUTBOUND_SEND_RETRY_DELAY_MILLIS = 25;
+    private static final long OUTBOUND_SEND_RETRY_TIMEOUT_MILLIS = 30_000;
     private static final int MAX_ACTIVE_CONNECTIONS = 64;
     private static final int MAX_PENDING_PEERS = 64;
     private static final long PENDING_PEER_TIMEOUT_MILLIS = 10_000;
@@ -76,8 +82,18 @@ public final class SteamRuntime {
     private final SteamBridgeRegistry<SteamConnectionBridge, SteamUdpBridge> bridgeRegistry =
             new SteamBridgeRegistry<>(MAX_ACTIVE_CONNECTIONS);
     private final ConcurrentHashMap<Long, Long> pendingPeers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Long, IdleSessionDeadline> idleSessionDeadlines = new ConcurrentHashMap<>();
+    // long[0] = next check, long[1] = forced close. An array keeps this
+    // state in SteamRuntime itself and avoids an extra lazy-loaded class on
+    // Forge 1.17/1.18.
+    private final ConcurrentHashMap<Long, long[]> idleSessionDeadlines = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<SteamTask<?>> steamTasks = new ConcurrentLinkedQueue<>();
+
+    // A reliable packet rejected by Steam with temporary backpressure stays
+    // ahead of the regular queue. Re-enqueuing it at the tail would reorder
+    // Minecraft's TCP byte stream and corrupt the connection.
+    private SteamOutboundQueue.Packet<SteamConnectionBridge> retryOutboundPacket;
+    private long retryOutboundNotBeforeMillis;
+    private long retryOutboundDeadlineMillis;
 
     private volatile Status status = Status.NEW;
     private volatile Throwable failureCause;
@@ -104,6 +120,61 @@ public final class SteamRuntime {
 
     public static SteamRuntime get() {
         return INSTANCE;
+    }
+
+    /**
+     * Forge 1.17/1.18 may fail to resolve shaded Steamworks nested classes
+     * when they are first requested later from the Steam callback thread.
+     * Resolve them while the mod class path is being constructed instead.
+     */
+    public static void preloadCompatibilityClasses() {
+        String[] names = {
+                "com.codedisaster.steamworks.SteamAPICall",
+                "com.codedisaster.steamworks.SteamException",
+                "com.codedisaster.steamworks.SteamFriends",
+                "com.codedisaster.steamworks.SteamFriends$FriendFlags",
+                "com.codedisaster.steamworks.SteamFriends$FriendGameInfo",
+                "com.codedisaster.steamworks.SteamFriends$FriendRelationship",
+                "com.codedisaster.steamworks.SteamFriends$OverlayDialog",
+                "com.codedisaster.steamworks.SteamFriends$OverlayToStoreFlag",
+                "com.codedisaster.steamworks.SteamFriends$OverlayToUserDialog",
+                "com.codedisaster.steamworks.SteamFriends$OverlayToWebPageMode",
+                "com.codedisaster.steamworks.SteamFriends$PersonaChange",
+                "com.codedisaster.steamworks.SteamFriends$PersonaState",
+                "com.codedisaster.steamworks.SteamFriendsCallback",
+                "com.codedisaster.steamworks.SteamFriendsCallbackAdapter",
+                "com.codedisaster.steamworks.SteamFriendsNative",
+                "com.codedisaster.steamworks.SteamID",
+                "com.codedisaster.steamworks.SteamMatchmaking",
+                "com.codedisaster.steamworks.SteamMatchmaking$ChatEntry",
+                "com.codedisaster.steamworks.SteamMatchmaking$ChatEntryType",
+                "com.codedisaster.steamworks.SteamMatchmaking$ChatMemberStateChange",
+                "com.codedisaster.steamworks.SteamMatchmaking$ChatRoomEnterResponse",
+                "com.codedisaster.steamworks.SteamMatchmaking$LobbyComparison",
+                "com.codedisaster.steamworks.SteamMatchmaking$LobbyDistanceFilter",
+                "com.codedisaster.steamworks.SteamMatchmaking$LobbyType",
+                "com.codedisaster.steamworks.SteamMatchmakingCallback",
+                "com.codedisaster.steamworks.SteamMatchmakingCallbackAdapter",
+                "com.codedisaster.steamworks.SteamMatchmakingGameServerItem",
+                "com.codedisaster.steamworks.SteamMatchmakingKeyValuePair",
+                "com.codedisaster.steamworks.SteamMatchmakingNative",
+                "com.codedisaster.steamworks.SteamMatchmakingPingResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingPlayersResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingRulesResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingServerListResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingServerListResponse$Response",
+                "com.codedisaster.steamworks.SteamMatchmakingServerNetAdr",
+                "com.codedisaster.steamworks.SteamMatchmakingServers",
+                "com.codedisaster.steamworks.SteamMatchmakingServersNative"
+        };
+        ClassLoader loader = SteamRuntime.class.getClassLoader();
+        for (String name : names) {
+            try {
+                Class.forName(name, false, loader);
+            } catch (ClassNotFoundException | LinkageError error) {
+                E4steamClient.LOGGER.warn("Could not preload Steam compatibility class {}", name, error);
+            }
+        }
     }
 
     /**
@@ -1042,7 +1113,14 @@ public final class SteamRuntime {
     private void drainOutbound(ByteBuffer buffer) throws Exception {
         SteamNetworkingMessagesTransport current = Objects.requireNonNull(transport);
         for (int sent = 0; sent < MAX_PACKETS_PER_TICK; sent++) {
-            SteamOutboundQueue.Packet<SteamConnectionBridge> packet = outbound.poll();
+            long now = System.currentTimeMillis();
+            SteamOutboundQueue.Packet<SteamConnectionBridge> packet = retryOutboundPacket;
+            if (packet != null && now < retryOutboundNotBeforeMillis) {
+                return;
+            }
+            if (packet == null) {
+                packet = outbound.poll();
+            }
             if (packet == null) {
                 return;
             }
@@ -1053,6 +1131,7 @@ public final class SteamRuntime {
             );
             SteamConnectionBridge currentBridge = bridgeRegistry.get(key);
             if (!isPacketCurrent(packet, currentBridge)) {
+                clearRetriedPacket(packet);
                 continue;
             }
 
@@ -1066,16 +1145,36 @@ public final class SteamRuntime {
             );
             boolean accepted = result == 1;
             SteamConnectionBridge packetBridge = packet.bridge();
+            if (accepted) {
+                clearRetriedPacket(packet);
+            }
             if (packet.kind() == SteamOutboundQueue.Kind.RESET && packetBridge != null) {
                 packetBridge.markResetSubmitted();
             } else if (accepted && packet.kind() == SteamOutboundQueue.Kind.FIN && packetBridge != null) {
                 packetBridge.markFinSubmitted();
             } else if (!accepted && packetBridge != null && packet.kind() != SteamOutboundQueue.Kind.DATAGRAM) {
+                SteamResult failure = SteamResult.byValue(result);
+                if (isRetryableSendFailure(failure)) {
+                    if (retryOutboundPacket != packet) {
+                        retryOutboundPacket = packet;
+                        retryOutboundDeadlineMillis = now + OUTBOUND_SEND_RETRY_TIMEOUT_MILLIS;
+                        E4steamClient.LOGGER.debug(
+                                "Steam applied outbound backpressure for {}; preserving and retrying {}",
+                                Long.toUnsignedString(packet.remoteSteamId()),
+                                packet.kind()
+                        );
+                    }
+                    if (now < retryOutboundDeadlineMillis) {
+                        retryOutboundNotBeforeMillis = now + OUTBOUND_SEND_RETRY_DELAY_MILLIS;
+                        return;
+                    }
+                    clearRetriedPacket(packet);
+                }
                 E4steamClient.LOGGER.warn(
                         "Steam Networking Messages send to {} failed for {}: {} ({})",
                         Long.toUnsignedString(packet.remoteSteamId()),
                         packet.kind(),
-                        SteamResult.byValue(result),
+                        failure,
                         result
                 );
                 packetBridge.close(false);
@@ -1116,10 +1215,32 @@ public final class SteamRuntime {
 
     private void clearOutbound() {
         outbound.clear();
+        retryOutboundPacket = null;
+        retryOutboundNotBeforeMillis = 0;
+        retryOutboundDeadlineMillis = 0;
     }
 
     private void purgeOutbound(SteamConnectionBridge bridge) {
         outbound.purge(bridge);
+        SteamOutboundQueue.Packet<SteamConnectionBridge> retry = retryOutboundPacket;
+        if (retry != null && retry.bridge() == bridge) {
+            clearRetriedPacket(retry);
+        }
+    }
+
+    private void clearRetriedPacket(SteamOutboundQueue.Packet<SteamConnectionBridge> packet) {
+        if (retryOutboundPacket == packet) {
+            retryOutboundPacket = null;
+            retryOutboundNotBeforeMillis = 0;
+            retryOutboundDeadlineMillis = 0;
+        }
+    }
+
+    static boolean isRetryableSendFailure(SteamResult result) {
+        return result == SteamResult.LimitExceeded
+                || result == SteamResult.Busy
+                || result == SteamResult.NoConnection
+                || result == SteamResult.ServiceUnavailable;
     }
 
     private boolean isPacketCurrent(
@@ -1387,21 +1508,18 @@ public final class SteamRuntime {
             }
         });
         idleSessionDeadlines.forEach((remoteSteamId, deadline) -> {
-            if (deadline.nextCheckAtMillis() <= now) {
+            if (deadline[0] <= now) {
                 synchronized (peerSessionLock) {
                     if (idleSessionDeadlines.get(remoteSteamId) != deadline) {
                         return;
                     }
                     if (hasBridgeForRemote(remoteSteamId)) {
                         idleSessionDeadlines.remove(remoteSteamId);
-                    } else if (now < deadline.forceCloseAtMillis()
+                    } else if (now < deadline[1]
                             && hasQueuedSteamPackets(remoteSteamId)) {
                         idleSessionDeadlines.put(
                                 remoteSteamId,
-                                new IdleSessionDeadline(
-                                        now + IDLE_SESSION_RECHECK_MILLIS,
-                                        deadline.forceCloseAtMillis()
-                                )
+                                new long[]{now + IDLE_SESSION_RECHECK_MILLIS, deadline[1]}
                         );
                     } else {
                         idleSessionDeadlines.remove(remoteSteamId);
@@ -1412,12 +1530,12 @@ public final class SteamRuntime {
         });
     }
 
-    private IdleSessionDeadline newIdleSessionDeadline() {
+    private long[] newIdleSessionDeadline() {
         long now = System.currentTimeMillis();
-        return new IdleSessionDeadline(
+        return new long[]{
                 now + IDLE_SESSION_CLOSE_DELAY_MILLIS,
                 now + IDLE_SESSION_MAX_DRAIN_MILLIS
-        );
+        };
     }
 
     private boolean hasQueuedSteamPackets(long remoteSteamId) {
@@ -1451,9 +1569,6 @@ public final class SteamRuntime {
             byte[] token,
             SteamAccessMode accessMode
     ) {
-    }
-
-    private record IdleSessionDeadline(long nextCheckAtMillis, long forceCloseAtMillis) {
     }
 
     /** A restart-safe lease that keeps Spacewar/Steamworks active while needed. */

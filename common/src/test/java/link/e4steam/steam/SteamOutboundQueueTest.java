@@ -1,5 +1,6 @@
 package link.e4steam.steam;
 
+import com.codedisaster.steamworks.SteamResult;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,5 +43,14 @@ class SteamOutboundQueueTest {
         assertEquals(9, packet.remoteSteamId());
         assertEquals(SteamOutboundQueue.Kind.DATA, packet.kind());
         assertTrue(queue.offerData(9, 11, new byte[]{8}, "bridge"));
+    }
+
+    @Test
+    void steamBackpressureResultsAreRetriedInsteadOfDisconnectingMinecraft() {
+        assertTrue(SteamRuntime.isRetryableSendFailure(SteamResult.LimitExceeded));
+        assertTrue(SteamRuntime.isRetryableSendFailure(SteamResult.Busy));
+        assertTrue(SteamRuntime.isRetryableSendFailure(SteamResult.NoConnection));
+        assertTrue(SteamRuntime.isRetryableSendFailure(SteamResult.ServiceUnavailable));
+        assertFalse(SteamRuntime.isRetryableSendFailure(SteamResult.InvalidParam));
     }
 }

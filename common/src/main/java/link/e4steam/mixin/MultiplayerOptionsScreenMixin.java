@@ -5,7 +5,7 @@ import link.e4steam.E4steamClient;
 import link.e4steam.MinecraftUiCompat;
 import link.e4steam.Mirror;
 import link.e4steam.steam.SteamAccessMode;
-import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,22 +34,18 @@ public abstract class MultiplayerOptionsScreenMixin extends Screen {
             E4steamClient.selectedAccessMode = initialMode;
         }
 
-        CycleButton<SteamAccessMode> accessButton =
-                CycleButton.<SteamAccessMode>builder(MultiplayerOptionsScreenMixin::e4steam$accessModeName)
-                        .withValues(
-                                SteamAccessMode.LOCAL_ONLY,
-                                SteamAccessMode.FRIENDS_ONLY,
-                                SteamAccessMode.INVITE_ONLY
-                        )
-                        .withInitialValue(initialMode)
-                        .create(
-                                width / 2 - 155,
-                                height - 56,
-                                310,
-                                20,
-                                Mirror.translatable("text.e4steam_minecraft.accessMode"),
-                                (button, mode) -> E4steamClient.selectedAccessMode = mode
-                        );
+        Button accessButton = MinecraftUiCompat.button(
+                e4steam$accessModeName(initialMode),
+                button -> {
+                    SteamAccessMode next = e4steam$nextAccessMode(E4steamClient.selectedAccessMode);
+                    E4steamClient.selectedAccessMode = next;
+                    button.setMessage(e4steam$accessModeName(next));
+                },
+                width / 2 - 155,
+                height - 56,
+                310,
+                20
+        );
         MinecraftUiCompat.tooltip(
                 accessButton,
                 Mirror.translatable("text.e4steam_minecraft.accessModeHelp")
@@ -59,6 +55,17 @@ public abstract class MultiplayerOptionsScreenMixin extends Screen {
 
     @Unique
     private static Component e4steam$accessModeName(SteamAccessMode mode) {
-        return Mirror.translatable(mode.translationKey());
+        Component label = Mirror.append(
+                Mirror.translatable("text.e4steam_minecraft.accessMode"),
+                Mirror.literal(": ")
+        );
+        return Mirror.append(label, Mirror.translatable(mode.translationKey()));
+    }
+
+    @Unique
+    private static SteamAccessMode e4steam$nextAccessMode(SteamAccessMode mode) {
+        SteamAccessMode current = mode == null ? SteamAccessMode.FRIENDS_ONLY : mode;
+        SteamAccessMode[] values = SteamAccessMode.values();
+        return values[(current.ordinal() + 1) % values.length];
     }
 }

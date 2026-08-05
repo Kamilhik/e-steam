@@ -31,6 +31,7 @@ public class E4steamClient {
 
     public static void init() {
         Config.INSTANCE.id(); // Touch to initialize for McQoy
+        SteamRuntime.preloadCompatibilityClasses();
     }
 
     public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
