@@ -66,13 +66,6 @@ Declared ranges are broader than the manually tested matrix. Check
 4. Install the same e4steam release on every player's computer.
 5. Start Steam and sign in before launching Minecraft.
 
-## Steam Overlay setup
-
-1. In Steam, select **Games → Add a Non-Steam Game** and add your Minecraft launcher.
-2. Open the shortcut properties and enable **Steam Overlay while in-game**.
-3. Start the launcher from that Steam shortcut, then start Minecraft.
-4. In a world, press **Shift + Tab** to verify that the overlay opens.
-
 ## Playing
 
 1. Open a singleplayer world.
@@ -156,12 +149,6 @@ Minecraft и UDP-трафик поддерживаемых голосовых м
 4. Установите одинаковый релиз e4steam всем игрокам.
 5. Запустите Steam и войдите в аккаунт до запуска Minecraft.
 
-## Как настроить оверлей Steam
-
-1. В Steam выберите **Игры → Добавить стороннюю игру** и добавьте свой лаунчер Minecraft.
-2. В свойствах ярлыка включите **Оверлей Steam в игре**.
-3. Запускайте лаунчер из этого ярлыка Steam, затем запускайте Minecraft.
-4. В мире нажмите **Shift + Tab** и убедитесь, что оверлей открывается.
 
 ## Как играть
 
