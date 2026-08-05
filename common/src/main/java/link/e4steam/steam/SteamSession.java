@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** Lifecycle for one Minecraft integrated-server LAN share. */
 public final class SteamSession {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final long HOST_LOBBY_START_TIMEOUT_SECONDS = 75;
 
     private final Object lifecycleLock = new Object();
     private final int localPort;
@@ -123,7 +124,10 @@ public final class SteamSession {
                 lobbyCreated = runtime.createHostLobby(this, accessMode, newAddress);
             }
 
-            lobbyCreated.get(20, TimeUnit.SECONDS);
+            // VPN routes can make CreateLobby time out while Steam itself is
+            // still connected. The lobby manager retries sequentially, so
+            // keep this session alive long enough for every attempt.
+            lobbyCreated.get(HOST_LOBBY_START_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             synchronized (lifecycleLock) {
                 if (state != State.STARTING) {
                     return;

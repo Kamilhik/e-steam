@@ -9,8 +9,11 @@ pluginManagement {
 }
 
 include("common")
-include("fabric")
-include("forge")
-include("neoforge")
+providers.gradleProperty("enabled_platforms")
+        .getOrElse("fabric,forge,neoforge")
+        .split(",")
+        .collect { it.trim() }
+        .findAll { !it.isEmpty() }
+        .each { include(it) }
 
 rootProject.name = "e4steam"

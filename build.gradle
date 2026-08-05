@@ -47,7 +47,9 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-        options.release = 17
+        options.release = providers.gradleProperty("java_release")
+                .map { Integer.parseInt(it) }
+                .getOrElse(17)
     }
 
     java {
@@ -214,8 +216,20 @@ tasks.register("releaseJars") {
                         || zip.getEntry("META-INF/THIRD_PARTY_NOTICES.md") == null) {
                     throw new GradleException("${variant.label} is missing packaged legal notices")
                 }
-                if (zip.getEntry("e4steam.mixins.json") == null) {
+                def mixinsEntry = zip.getEntry("e4steam.mixins.json")
+                if (mixinsEntry == null) {
                     throw new GradleException("${variant.label} is missing e4steam.mixins.json")
+                }
+                String mixinsConfig = zip.getInputStream(mixinsEntry).getText("UTF-8")
+                if (!mixinsConfig.contains("ServerLoginPacketListenerImplMixin")) {
+                    throw new GradleException(
+                            "${variant.label} does not enable authenticated offline-launcher login"
+                    )
+                }
+                if (!mixinsConfig.contains("MultiplayerOptionsScreenMixin")) {
+                    throw new GradleException(
+                            "${variant.label} does not support the Minecraft 26.x multiplayer options screen"
+                    )
                 }
                 if (zip.getEntry("assets/e4steam_minecraft/icon.png") == null) {
                     throw new GradleException("${variant.label} is missing the e4steam mod icon")
@@ -224,6 +238,26 @@ tasks.register("releaseJars") {
                 def classEntry = zip.getEntry("link/e4steam/steam/SteamAddress.class")
                 if (classEntry == null) {
                     throw new GradleException("${variant.label} is missing SteamAddress.class")
+                }
+                if (zip.getEntry("link/e4steam/steam/SteamNetworkingMessagesTransport.class") == null) {
+                    throw new GradleException(
+                            "${variant.label} is missing the Steam Networking Messages transport"
+                    )
+                }
+                if (zip.getEntry("link/e4steam/steam/SteamPacketTransport.class") != null) {
+                    throw new GradleException(
+                            "${variant.label} still contains the deprecated ISteamNetworking transport"
+                    )
+                }
+                if (zip.getEntry("link/e4steam/mixin/ServerLoginPacketListenerImplMixin.class") == null) {
+                    throw new GradleException(
+                            "${variant.label} is missing authenticated offline-launcher support"
+                    )
+                }
+                if (zip.getEntry("link/e4steam/mixin/MultiplayerOptionsScreenMixin.class") == null) {
+                    throw new GradleException(
+                            "${variant.label} is missing the Minecraft 26.x LAN GUI compatibility mixin"
+                    )
                 }
                 def stream = new DataInputStream(zip.getInputStream(classEntry))
                 try {

@@ -25,6 +25,59 @@ belong to this fork and are independent of upstream e4mc releases.
 - Офлайн-режим действует только на новые подключения; переключение не выгоняет
   игроков, уже находящихся в мире.
 
+## 0.2.2 - 2026-08-05
+## 0.2.2 - 2026-08-05
+
+### English
+
+- Added offline-launcher profile support for Steam guests. Mojang session
+  authentication is bypassed only for an already authenticated Steam bridge;
+  Minecraft keeps its normal offline profile through login and configuration.
+- Replaced the deprecated `ISteamNetworking` transport with
+  `ISteamNetworkingMessages`, the packet-oriented API built on Steam
+  Networking Sockets.
+- Raised the wire and lobby protocol version to 3 so legacy-transport clients
+  fail compatibility checks instead of attempting an incompatible session.
+- Added periodic acceptance for authenticated lobby peers and Steam Networking
+  Sockets diagnostics to make session establishment reliable even when the
+  asynchronous session-request callback is delayed.
+- Restored the e4steam access selector on Minecraft 26.x, where the old
+  `ShareToLanScreen` was replaced by `MultiplayerOptionsScreen`.
+- Steam lobby creation now retries temporary network failures, improving
+  startup on slow and VPN-routed connections.
+- Fixed immediate guest disconnects and infinite falling during world loading
+  by preserving reliable packet order, pacing bursts, and expanding the
+  bounded localhost buffer.
+- Restored the native Steam friends invitation dialog.
+- Fixed missing Steamworks compatibility classes on Forge 1.18.1.
+- Fixed the LAN configuration crash and restored the e4steam access selector
+  on Fabric and Quilt 1.21.11.
+- Removed the temporary movement lock after joining a world.
+
+### Русский
+
+- Добавлена поддержка офлайн-профилей лаунчеров для гостей Steam. Проверка
+  сессии Mojang отключается только для уже авторизованного Steam bridge, а
+  профиль Minecraft сохраняется штатным при переходе login/configuration.
+- Устаревший транспорт `ISteamNetworking` заменён на
+  `ISteamNetworkingMessages` — пакетный API поверх Steam Networking Sockets.
+- Версия сетевого и lobby-протокола повышена до 3, чтобы клиенты со старым
+  транспортом отклонялись проверкой совместимости.
+- Добавлены периодическое принятие сессий проверенных участников lobby и
+  диагностика Steam Networking Sockets на случай задержки callback-запроса.
+- Возвращён выбор режима доступа e4steam на Minecraft 26.x, где старый
+  `ShareToLanScreen` заменён новым `MultiplayerOptionsScreen`.
+- Создание лобби Steam теперь повторяется при временных сетевых ошибках, что
+  повышает надёжность запуска через медленные соединения и VPN.
+- Исправлены мгновенные отключения гостей и бесконечное падение при загрузке
+  мира: надёжные пакеты сохраняют порядок, обрабатываются равномерными
+  порциями, а ограниченный локальный буфер увеличен.
+- Возвращено нативное окно приглашения друзей Steam.
+- Исправлены отсутствующие классы совместимости Steamworks на Forge 1.18.1.
+- Исправлен вылет меню открытия мира для сети и возвращён выбор режима доступа
+  e4steam на Fabric и Quilt 1.21.11.
+- Убрана временная блокировка движения после подключения к миру.
+
 ## 0.2.1 - 2026-08-03
 
 ### English

@@ -13,7 +13,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /** Bridges one ordinary local TCP connection to one logical Steam P2P stream. */
 final class SteamConnectionBridge {
-    private static final int MAX_QUEUED_INBOUND_CHUNKS = 64;
+    // Eight MiB at the current 32 KiB protocol chunk size. This absorbs
+    // registry/chunk bursts while remaining bounded for multiple players.
+    private static final int MAX_QUEUED_INBOUND_CHUNKS = 256;
+    private static final long OUTBOUND_BACKPRESSURE_TIMEOUT_MILLIS = 30_000;
+    private static final long OUTBOUND_BACKPRESSURE_RETRY_MILLIS = 10;
 
     private final SteamRuntime runtime;
     private final long remoteSteamId;
@@ -202,9 +206,7 @@ final class SteamConnectionBridge {
                 }
 
                 byte[] payload = Arrays.copyOf(buffer, read);
-                if (!runtime.sendData(this, payload)) {
-                    throw new IOException("Steam outbound queue is full or unavailable");
-                }
+                sendDataWithBackpressure(payload);
             }
         } catch (IOException exception) {
             if (!closed.get()) {
@@ -212,6 +214,25 @@ final class SteamConnectionBridge {
                 close(true);
             }
         }
+    }
+
+    private void sendDataWithBackpressure(byte[] payload) throws IOException {
+        long deadline = System.currentTimeMillis() + OUTBOUND_BACKPRESSURE_TIMEOUT_MILLIS;
+        while (!closed.get()) {
+            if (runtime.sendData(this, payload)) {
+                return;
+            }
+            if (System.currentTimeMillis() >= deadline) {
+                throw new IOException("Steam outbound queue remained full for 30 seconds");
+            }
+            try {
+                Thread.sleep(OUTBOUND_BACKPRESSURE_RETRY_MILLIS);
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Interrupted while waiting for Steam outbound capacity", exception);
+            }
+        }
+        throw new IOException("Steam bridge closed while waiting for outbound capacity");
     }
 
     private void writeLoop() {
