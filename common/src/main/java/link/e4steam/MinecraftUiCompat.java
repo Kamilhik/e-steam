@@ -9,6 +9,7 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -208,6 +209,70 @@ public final class MinecraftUiCompat {
             }
         }
         throw new NoSuchMethodException("No compatible Minecraft disconnect method was found");
+    }
+
+    /**
+     * Returns the currently displayed screen. Minecraft 26.2 moved the current
+     * screen out of {@code Minecraft.screen} and into {@code Gui#screen()}; the
+     * compiled field reference below stays valid everywhere up to 26.1.
+     */
+    public static Screen currentScreen(Minecraft minecraft) {
+        try {
+            Field screenField = Minecraft.class.getDeclaredField("screen");
+            screenField.setAccessible(true);
+            return (Screen) screenField.get(minecraft);
+        } catch (NoSuchFieldException ignored) {
+            // 26.2 removed the field; ask Gui instead.
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // Fall through to the Gui-based accessors.
+        }
+        try {
+            Field guiField = Minecraft.class.getDeclaredField("gui");
+            guiField.setAccessible(true);
+            Object gui = guiField.get(minecraft);
+            if (gui != null) {
+                for (Method method : gui.getClass().getMethods()) {
+                    if (method.getParameterCount() == 0
+                            && !Modifier.isStatic(method.getModifiers())
+                            && Screen.class.isAssignableFrom(method.getReturnType())) {
+                        return (Screen) method.invoke(gui);
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // Fall back to the compiled screen field below.
+        }
+        return minecraft.screen;
+    }
+
+    /**
+     * Sets the displayed screen. Minecraft 26.2 moved {@code setScreen} from
+     * {@code Minecraft} to {@code Gui#setScreen(Screen)}; the compiled call
+     * below stays valid everywhere up to 26.1.
+     */
+    public static void setCurrentScreen(Minecraft minecraft, Screen screen) {
+        try {
+            Field guiField = Minecraft.class.getDeclaredField("gui");
+            guiField.setAccessible(true);
+            Object gui = guiField.get(minecraft);
+            if (gui != null) {
+                for (Method method : gui.getClass().getMethods()) {
+                    if (method.getParameterCount() == 1
+                            && !Modifier.isStatic(method.getModifiers())
+                            && method.getReturnType() == void.class) {
+                        Class<?> parameterType = method.getParameterTypes()[0];
+                        if (parameterType != Object.class
+                                && parameterType.isAssignableFrom(Screen.class)) {
+                            method.invoke(gui, screen);
+                            return;
+                        }
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // Fall back to the compiled setScreen call below.
+        }
+        minecraft.setScreen(screen);
     }
 
     private static Button tryBuilder(

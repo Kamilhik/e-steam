@@ -3,6 +3,24 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
+## Unreleased
+
+### English
+
+- Fixed a `NoSuchFieldError: Minecraft.screen` crash when accepting a Steam
+  invite or opening the stop confirmation on Minecraft 26.2. The current screen
+  is now accessed through the version-compatibility layer, which uses
+  `Gui#screen()`/`Gui#setScreen()` on 26.2 and the classic `Minecraft.screen`
+  field everywhere else.
+
+### Русский
+
+- Исправлен вылет `NoSuchFieldError: Minecraft.screen` при принятии
+  Steam-приглашения и открытии подтверждения остановки на Minecraft 26.2.
+  Текущий экран теперь читается через слой версионной совместимости:
+  на 26.2 используется `Gui#screen()`/`Gui#setScreen()`, на остальных версиях —
+  прежнее поле `Minecraft.screen`.
+
 ## 0.2.2 - 2026-08-05
 
 ### English

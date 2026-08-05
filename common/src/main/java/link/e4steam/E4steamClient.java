@@ -146,9 +146,9 @@ public class E4steamClient {
     private static void showStopConfirmation(CommandSourceStack source, SteamSession requestedSession) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.execute(() -> {
-            Screen previousScreen = minecraft.screen;
-            minecraft.setScreen(new ConfirmScreen(confirmed -> {
-                minecraft.setScreen(previousScreen);
+            Screen previousScreen = MinecraftUiCompat.currentScreen(minecraft);
+            MinecraftUiCompat.setCurrentScreen(minecraft, new ConfirmScreen(confirmed -> {
+                MinecraftUiCompat.setCurrentScreen(minecraft, previousScreen);
                 if (!confirmed) {
                     return;
                 }
@@ -205,9 +205,9 @@ public class E4steamClient {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.execute(() -> {
             String displayName = normalizedHostName(hostName);
-            if (minecraft.screen instanceof ConnectScreen) {
+            if (MinecraftUiCompat.currentScreen(minecraft) instanceof ConnectScreen) {
                 SteamRuntime.get().cancelGuestJoin();
-                minecraft.gui.getChat().addMessage(
+                Mirror.addMessage(
                         Mirror.translatable("text.e4steam_minecraft.joinAlreadyConnecting")
                 );
                 return;
@@ -218,18 +218,18 @@ public class E4steamClient {
                 return;
             }
 
-            Screen previousScreen = minecraft.screen;
+            Screen previousScreen = MinecraftUiCompat.currentScreen(minecraft);
             Component title = Mirror.translatable("text.e4steam_minecraft.joinInviteTitle");
             Component message = Mirror.translatable("text.e4steam_minecraft.joinInviteMessage", displayName);
-            minecraft.setScreen(new ConfirmScreen(confirmed -> {
+            MinecraftUiCompat.setCurrentScreen(minecraft, new ConfirmScreen(confirmed -> {
                 if (!confirmed) {
                     SteamRuntime.get().cancelGuestJoin();
-                    minecraft.setScreen(previousScreen);
+                    MinecraftUiCompat.setCurrentScreen(minecraft, previousScreen);
                     return;
                 }
 
                 Screen returnScreen = multiplayerScreen();
-                minecraft.setScreen(MinecraftUiCompat.messageScreen(
+                MinecraftUiCompat.setCurrentScreen(minecraft, MinecraftUiCompat.messageScreen(
                         Mirror.translatable("connect.connecting"),
                         previousScreen
                 ));
@@ -260,13 +260,13 @@ public class E4steamClient {
     public static void showSteamJoinFailure(Component reason) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.execute(() -> {
-            if (minecraft.level != null || minecraft.screen instanceof ConnectScreen) {
-                minecraft.gui.getChat().addMessage(reason);
+            if (minecraft.level != null || MinecraftUiCompat.currentScreen(minecraft) instanceof ConnectScreen) {
+                Mirror.addMessage(reason);
                 return;
             }
 
             Screen parent = currentOrMultiplayerScreen(minecraft);
-            minecraft.setScreen(new DisconnectedScreen(
+            MinecraftUiCompat.setCurrentScreen(minecraft, new DisconnectedScreen(
                     parent,
                     Mirror.translatable("connect.failed"),
                     reason
@@ -347,13 +347,14 @@ public class E4steamClient {
             LOGGER.warn("Could not claim the Steam invitation", unwrapCompletionException(throwable));
         }
         if (minecraft.level != null) {
-            minecraft.setScreen(rejectionScreen);
+            MinecraftUiCompat.setCurrentScreen(minecraft, rejectionScreen);
         }
         showSteamJoinFailure(Mirror.translatable("text.e4steam_minecraft.joinExpired"));
     }
 
     private static Screen currentOrMultiplayerScreen(Minecraft minecraft) {
-        return minecraft.screen != null ? minecraft.screen : multiplayerScreen();
+        Screen current = MinecraftUiCompat.currentScreen(minecraft);
+        return current != null ? current : multiplayerScreen();
     }
 
     private static Screen multiplayerScreen() {

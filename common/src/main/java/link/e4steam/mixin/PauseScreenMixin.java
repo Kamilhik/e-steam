@@ -71,7 +71,7 @@ public abstract class PauseScreenMixin extends Screen {
                         cause = cause.getCause();
                     }
                     E4steamClient.LOGGER.warn("Could not open the Steam invitation overlay", cause);
-                    minecraft.gui.getChat().addMessage(
+                    Mirror.addMessage(
                             Mirror.translatable("text.e4steam_minecraft.overlayUnavailable")
                     );
                 }
