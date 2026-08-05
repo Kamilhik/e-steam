@@ -221,10 +221,8 @@ public final class MinecraftUiCompat {
             Field screenField = Minecraft.class.getDeclaredField("screen");
             screenField.setAccessible(true);
             return (Screen) screenField.get(minecraft);
-        } catch (NoSuchFieldException ignored) {
-            // 26.2 removed the field; ask Gui instead.
         } catch (ReflectiveOperationException | RuntimeException ignored) {
-            // Fall through to the Gui-based accessors.
+            // 26.2 removed the field; ask Gui instead.
         }
         try {
             Field guiField = Minecraft.class.getDeclaredField("gui");
