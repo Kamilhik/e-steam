@@ -25,7 +25,7 @@
 </div>
 
 > [!IMPORTANT]
-> **e4steam 0.2.1 is the current stable release.** Windows x64 is the primary
+> **e4steam 0.2.2 is the current stable release.** Windows x64 is the primary
 > supported platform. Linux x64 is experimental. Dedicated servers and macOS
 > are not supported. e4steam permanently uses the shared Steam test App ID 480
 > (Spacewar), so unrelated App ID 480 traffic is possible and is filtered.
@@ -108,7 +108,7 @@ shares Minecraft's port. Another UDP mod can use the `voiceChatPort` setting.
 <summary><h2>🇷🇺 Русская версия</h2></summary>
 
 > [!IMPORTANT]
-> **e4steam 0.2.1 — текущий стабильный релиз.** Основная поддерживаемая
+> **e4steam 0.2.2 — текущий стабильный релиз.** Основная поддерживаемая
 > платформа — Windows x64. Linux x64 пока экспериментальный. Выделенные серверы
 > и macOS не поддерживаются. Мод навсегда использует общий тестовый Steam App ID
 > 480 (Spacewar), поэтому посторонний трафик App ID 480 возможен и фильтруется.
