@@ -404,7 +404,7 @@ object E4steamClient {
         if (hostName == null || hostName.isBlank()) {
             return Mirror.translatable("text.e4steam_minecraft.steamFriend").getString()
         }
-        val normalized = hostName.replace(Regex("[\\p{Cc}\\p{Cf}]"), "").strip()
+        val normalized = hostName.replace(Regex("[\\p{Cc}\\p{Cf}]"), "").trim { it.isWhitespace() }
         if (normalized.isEmpty()) {
             return Mirror.translatable("text.e4steam_minecraft.steamFriend").getString()
         }
