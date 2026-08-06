@@ -2,6 +2,7 @@ plugins {
     id "architectury-plugin" version "3.4.164"
     id "dev.architectury.loom" version "1.13.469" apply false
     id "com.gradleup.shadow" version "8.3.6" apply false
+    id "org.jetbrains.kotlin.jvm" version "2.4.10"
 }
 
 architectury {
@@ -24,6 +25,7 @@ subprojects {
 allprojects {
     apply plugin: "java"
     apply plugin: "architectury-plugin"
+    apply plugin: "org.jetbrains.kotlin.jvm"
 
     base {
         archivesName = rootProject.archives_base_name + "-" + project.name
@@ -45,6 +47,12 @@ allprojects {
 
     java {
         withSourcesJar()
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget("16")
+        }
     }
 }
 

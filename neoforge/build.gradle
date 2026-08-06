@@ -25,6 +25,9 @@ dependencies {
     shadowCommon("com.code-disaster.steamworks4j:steamworks4j:${rootProject.steamworks4j_version}") {
         transitive false
     }
+    shadowCommon("org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}") {
+        transitive false
+    }
 }
 
 processResources {
