@@ -19,12 +19,12 @@
 @if "%DEBUG%"=="" @echo off
 @rem ##########################################################################
 @rem
-@rem  Gradle startup script for Windows
+@rem  gradlew startup script for Windows
 @rem
 @rem ##########################################################################
 
-@rem Set local scope for the variables with windows NT shell
-if "%OS%"=="Windows_NT" setlocal
+@rem Set local scope for the variables, and ensure extensions are enabled
+setlocal EnableExtensions
 
 set DIRNAME=%~dp0
 if "%DIRNAME%"=="" set DIRNAME=.
@@ -32,8 +32,8 @@ if "%DIRNAME%"=="" set DIRNAME=.
 set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%
 
-@rem Resolve any "." and ".." and prefer the DOS short path.
-for %%i in ("%APP_HOME%") do set APP_HOME=%%~fsi
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
@@ -51,7 +51,7 @@ echo. 1>&2
 echo Please set the JAVA_HOME variable in your environment to match the 1>&2
 echo location of your Java installation. 1>&2
 
-goto fail
+"%COMSPEC%" /c exit 1
 
 :findJavaFromJavaHome
 set JAVA_HOME=%JAVA_HOME:"=%
@@ -65,49 +65,18 @@ echo. 1>&2
 echo Please set the JAVA_HOME variable in your environment to match the 1>&2
 echo location of your Java installation. 1>&2
 
-goto fail
+"%COMSPEC%" /c exit 1
 
 :execute
 @rem Setup the command line
 
-@rem Gradle worker classpaths can be corrupted by Unicode checkout paths on
-@rem Windows. Use a temporary drive mapping for the duration of this build.
-set E4STEAM_SUBST_DRIVE=
-for %%D in (Z Y X W V U T R Q P O N M L K J I H G F E D B A) do if not defined E4STEAM_SUBST_DRIVE if not exist %%D:\ (
-    subst %%D: "%APP_HOME%" >NUL 2>&1
-    if not errorlevel 1 set E4STEAM_SUBST_DRIVE=%%D:
-)
-
-if defined E4STEAM_SUBST_DRIVE (
-    pushd "%E4STEAM_SUBST_DRIVE%\" >NUL
-) else (
-    echo WARNING: No free drive letter was available; falling back to the original project path.
-    pushd "%APP_HOME%" >NUL
-)
-
-set CLASSPATH=
 
 
-@rem Execute Gradle
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" -jar "gradle\wrapper\gradle-wrapper.jar" %*
-set EXIT_CODE=%ERRORLEVEL%
-popd
-if defined E4STEAM_SUBST_DRIVE subst %E4STEAM_SUBST_DRIVE% /d >NUL 2>&1
+@rem Execute gradlew
+@rem endlocal doesn't take effect until after the line is parsed and variables are expanded
+@rem which allows us to clear the local environment before executing the java command
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel
 
-:end
-@rem End local scope for the variables with windows NT shell
-if defined EXIT_CODE if %EXIT_CODE% equ 0 goto mainEnd
-if not defined EXIT_CODE if %ERRORLEVEL% equ 0 goto mainEnd
-
-:fail
-rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
-rem the _cmd.exe /c_ return code!
-if not defined EXIT_CODE set EXIT_CODE=%ERRORLEVEL%
-if %EXIT_CODE% equ 0 set EXIT_CODE=1
-if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
-exit /b %EXIT_CODE%
-
-:mainEnd
-if "%OS%"=="Windows_NT" endlocal
-
-:omega
+:exitWithErrorLevel
+@rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
+"%COMSPEC%" /c exit %ERRORLEVEL%
