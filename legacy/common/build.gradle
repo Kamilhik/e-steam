@@ -67,7 +67,7 @@ tasks.register("unstubbedSourcesJar", Jar) {
     archiveClassifier = "unstubbed-sources"
     dependsOn sourcesJar
     from sourcesJar.archiveFile.map { zipTree(it) }
-    exclude("link/e4steam/Agnos.java")
+    exclude("link/e4steam/Agnos.java", "link/e4steam/Agnos.kt")
 }
 
 artifacts {
