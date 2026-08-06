@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * serialized on a single daemon thread.
  */
 class SteamRuntime private constructor(api: SteamApi, installShutdownHook: Boolean) {
-    private val lifecycleLock = Any()
+    private val lifecycleLock = java.lang.Object()
     private val peerSessionLock = Any()
     private val steamLifecycle = SteamLifecycle(api)
     private val outbound = SteamOutboundQueue<SteamConnectionBridge>(
@@ -88,64 +88,6 @@ class SteamRuntime private constructor(api: SteamApi, installShutdownHook: Boole
         if (installShutdownHook) {
             val shutdownHook = Thread({ shutdown() }, "e4steam-steam-shutdown")
             Runtime.getRuntime().addShutdownHook(shutdownHook)
-        }
-    }
-
-    /**
-     * Forge 1.17/1.18 may fail to resolve shaded Steamworks nested classes
-     * when they are first requested later from the Steam callback thread.
-     * Resolve them while the mod class path is being constructed instead.
-     */
-    @JvmStatic
-    fun preloadCompatibilityClasses() {
-        val names = arrayOf(
-            "com.codedisaster.steamworks.SteamAPICall",
-            "com.codedisaster.steamworks.SteamException",
-            "com.codedisaster.steamworks.SteamFriends",
-            "com.codedisaster.steamworks.SteamFriends\$FriendFlags",
-            "com.codedisaster.steamworks.SteamFriends\$FriendGameInfo",
-            "com.codedisaster.steamworks.SteamFriends\$FriendRelationship",
-            "com.codedisaster.steamworks.SteamFriends\$OverlayDialog",
-            "com.codedisaster.steamworks.SteamFriends\$OverlayToStoreFlag",
-            "com.codedisaster.steamworks.SteamFriends\$OverlayToUserDialog",
-            "com.codedisaster.steamworks.SteamFriends\$OverlayToWebPageMode",
-            "com.codedisaster.steamworks.SteamFriends\$PersonaChange",
-            "com.codedisaster.steamworks.SteamFriends\$PersonaState",
-            "com.codedisaster.steamworks.SteamFriendsCallback",
-            "com.codedisaster.steamworks.SteamFriendsCallbackAdapter",
-            "com.codedisaster.steamworks.SteamFriendsNative",
-            "com.codedisaster.steamworks.SteamID",
-            "com.codedisaster.steamworks.SteamMatchmaking",
-            "com.codedisaster.steamworks.SteamMatchmaking\$ChatEntry",
-            "com.codedisaster.steamworks.SteamMatchmaking\$ChatEntryType",
-            "com.codedisaster.steamworks.SteamMatchmaking\$ChatMemberStateChange",
-            "com.codedisaster.steamworks.SteamMatchmaking\$ChatRoomEnterResponse",
-            "com.codedisaster.steamworks.SteamMatchmaking\$LobbyComparison",
-            "com.codedisaster.steamworks.SteamMatchmaking\$LobbyDistanceFilter",
-            "com.codedisaster.steamworks.SteamMatchmaking\$LobbyType",
-            "com.codedisaster.steamworks.SteamMatchmakingCallback",
-            "com.codedisaster.steamworks.SteamMatchmakingCallbackAdapter",
-            "com.codedisaster.steamworks.SteamMatchmakingGameServerItem",
-            "com.codedisaster.steamworks.SteamMatchmakingKeyValuePair",
-            "com.codedisaster.steamworks.SteamMatchmakingNative",
-            "com.codedisaster.steamworks.SteamMatchmakingPingResponse",
-            "com.codedisaster.steamworks.SteamMatchmakingPlayersResponse",
-            "com.codedisaster.steamworks.SteamMatchmakingRulesResponse",
-            "com.codedisaster.steamworks.SteamMatchmakingServerListResponse",
-            "com.codedisaster.steamworks.SteamMatchmakingServerListResponse\$Response",
-            "com.codedisaster.steamworks.SteamMatchmakingServerNetAdr",
-            "com.codedisaster.steamworks.SteamMatchmakingServers",
-            "com.codedisaster.steamworks.SteamMatchmakingServersNative"
-        )
-        val loader = SteamRuntime::class.java.classLoader
-        for (name in names) {
-            try {
-                Class.forName(name, false, loader)
-            } catch (error: ClassNotFoundException) {
-                E4steamClient.LOGGER.warn("Could not preload Steam compatibility class {}", name, error)
-            } catch (error: LinkageError) {
-                E4steamClient.LOGGER.warn("Could not preload Steam compatibility class {}", name, error)
-            }
         }
     }
 
@@ -1291,7 +1233,7 @@ class SteamRuntime private constructor(api: SteamApi, installShutdownHook: Boole
         }
         val buffer = ByteBuffer.wrap(payload)
         val clientPortMode = buffer.get()
-        val hostPort = Short.toUnsignedInt(buffer.short)
+        val hostPort = buffer.short.toInt() and 0xFFFF
         try {
             startClientUdpBridge(
                 bridge,
@@ -1584,12 +1526,70 @@ class SteamRuntime private constructor(api: SteamApi, installShutdownHook: Boole
         private const val IDLE_SESSION_MAX_DRAIN_MILLIS = 2_000L
         private const val LOOPBACK_CONNECT_TIMEOUT_MILLIS = 100
         private const val LOOPBACK_FAILURE_BACKOFF_MILLIS = 2_000L
-        private const val START_TIMEOUT = Duration.ofSeconds(30)
-        private const val STEAM_TASK_TIMEOUT = Duration.ofSeconds(10)
+        private val START_TIMEOUT = Duration.ofSeconds(30)
+        private val STEAM_TASK_TIMEOUT = Duration.ofSeconds(10)
         private const val RUNTIME_IDLE_SHUTDOWN_MILLIS = 1_000L
         private const val KNOWN_PEER_ACCEPT_INTERVAL_MILLIS = 100L
 
         private val INSTANCE = SteamRuntime(SteamworksApi(), true)
+
+        /**
+         * Forge 1.17/1.18 may fail to resolve shaded Steamworks nested classes
+         * when they are first requested later from the Steam callback thread.
+         * Resolve them while the mod class path is being constructed instead.
+         */
+        @JvmStatic
+        fun preloadCompatibilityClasses() {
+            val names = arrayOf(
+                "com.codedisaster.steamworks.SteamAPICall",
+                "com.codedisaster.steamworks.SteamException",
+                "com.codedisaster.steamworks.SteamFriends",
+                "com.codedisaster.steamworks.SteamFriends\$FriendFlags",
+                "com.codedisaster.steamworks.SteamFriends\$FriendGameInfo",
+                "com.codedisaster.steamworks.SteamFriends\$FriendRelationship",
+                "com.codedisaster.steamworks.SteamFriends\$OverlayDialog",
+                "com.codedisaster.steamworks.SteamFriends\$OverlayToStoreFlag",
+                "com.codedisaster.steamworks.SteamFriends\$OverlayToUserDialog",
+                "com.codedisaster.steamworks.SteamFriends\$OverlayToWebPageMode",
+                "com.codedisaster.steamworks.SteamFriends\$PersonaChange",
+                "com.codedisaster.steamworks.SteamFriends\$PersonaState",
+                "com.codedisaster.steamworks.SteamFriendsCallback",
+                "com.codedisaster.steamworks.SteamFriendsCallbackAdapter",
+                "com.codedisaster.steamworks.SteamFriendsNative",
+                "com.codedisaster.steamworks.SteamID",
+                "com.codedisaster.steamworks.SteamMatchmaking",
+                "com.codedisaster.steamworks.SteamMatchmaking\$ChatEntry",
+                "com.codedisaster.steamworks.SteamMatchmaking\$ChatEntryType",
+                "com.codedisaster.steamworks.SteamMatchmaking\$ChatMemberStateChange",
+                "com.codedisaster.steamworks.SteamMatchmaking\$ChatRoomEnterResponse",
+                "com.codedisaster.steamworks.SteamMatchmaking\$LobbyComparison",
+                "com.codedisaster.steamworks.SteamMatchmaking\$LobbyDistanceFilter",
+                "com.codedisaster.steamworks.SteamMatchmaking\$LobbyType",
+                "com.codedisaster.steamworks.SteamMatchmakingCallback",
+                "com.codedisaster.steamworks.SteamMatchmakingCallbackAdapter",
+                "com.codedisaster.steamworks.SteamMatchmakingGameServerItem",
+                "com.codedisaster.steamworks.SteamMatchmakingKeyValuePair",
+                "com.codedisaster.steamworks.SteamMatchmakingNative",
+                "com.codedisaster.steamworks.SteamMatchmakingPingResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingPlayersResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingRulesResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingServerListResponse",
+                "com.codedisaster.steamworks.SteamMatchmakingServerListResponse\$Response",
+                "com.codedisaster.steamworks.SteamMatchmakingServerNetAdr",
+                "com.codedisaster.steamworks.SteamMatchmakingServers",
+                "com.codedisaster.steamworks.SteamMatchmakingServersNative"
+            )
+            val loader = SteamRuntime::class.java.classLoader
+            for (name in names) {
+                try {
+                    Class.forName(name, false, loader)
+                } catch (error: ClassNotFoundException) {
+                    E4steamClient.LOGGER.warn("Could not preload Steam compatibility class {}", name, error)
+                } catch (error: LinkageError) {
+                    E4steamClient.LOGGER.warn("Could not preload Steam compatibility class {}", name, error)
+                }
+            }
+        }
 
         @JvmStatic
         fun get(): SteamRuntime = INSTANCE
