@@ -6,6 +6,18 @@ two-player Steam session.
 
 Legend: ✅ verified · ⏳ not yet manually verified · — unsupported.
 
+## 26.3 Snapshot 7 smoke test
+
+On 2026-08-06, a local Windows Fabric client entered a single-player world
+with the development build and displayed the e4steam access control in the new
+world-options screen. The initial smoke test exposed a non-clickable control;
+the follow-up layout fix compiles but still needs an in-game confirmation.
+A two-player Steam session has not been tested yet.
+
+| Loader | Minecraft | World load | Steam access control | Host/guest |
+| --- | --- | --- | --- | --- |
+| Fabric | 26.3 Snapshot 7 | ✅ | ⏳ | ⏳ |
+
 ## 0.2.1 control run
 
 On 2026-08-03, the final 0.2.1 sources were checked on one representative

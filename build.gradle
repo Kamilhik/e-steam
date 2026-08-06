@@ -138,13 +138,16 @@ tasks.register("releaseJars") {
                 ],
                 [
                         label: "Fabric/Quilt Modern",
-                        publicName: "e4steam-fabric-quilt-mc26.1-26.2-v${version}.jar",
+                        publicName: "e4steam-fabric-quilt-mc26.1-26.3-snapshot-7-v${version}.jar",
                         file: file("fabric/build/libs/e4steam-fabric-${version}-modern.jar"),
                         major: 61,
+                        worldOptions: true,
                         metadata: ["fabric.mod.json": [
                                 '"id": "e4steam"',
                                 '"icon": "assets/e4steam_minecraft/icon.png"',
-                                '"minecraft": ">=26.1- <26.3-"',
+                                '"minecraft": [',
+                                '">=26.1- <26.3-"',
+                                '"26.3-alpha.7"',
                                 '"java": ">=25"'
                         ]]
                 ],
@@ -229,6 +232,13 @@ tasks.register("releaseJars") {
                 if (!mixinsConfig.contains("MultiplayerOptionsScreenMixin")) {
                     throw new GradleException(
                             "${variant.label} does not support the Minecraft 26.x multiplayer options screen"
+                    )
+                }
+                if (variant.worldOptions
+                        && (!mixinsConfig.contains("WorldOptionsScreenMixin")
+                        || zip.getEntry("link/e4steam/mixin/WorldOptionsScreenMixin.class") == null)) {
+                    throw new GradleException(
+                            "${variant.label} does not support the Minecraft 26.3 world options screen"
                     )
                 }
                 if (zip.getEntry("assets/e4steam_minecraft/icon.png") == null) {

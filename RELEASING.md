@@ -22,7 +22,7 @@ experimental Linux x64 support.
 | `e4steam-fabric-<version>-mc1.17-1.18.2.jar` | Fabric and Quilt | 1.17–1.18.2 | Fabric API |
 | `e4steam-forge-<version>-legacy17.jar` | Forge | 1.17.1–1.18.1 | None |
 | `e4steam-fabric-<version>.jar` | Fabric and Quilt | 1.19–1.21.11 | Fabric API |
-| `e4steam-fabric-<version>-modern.jar` | Fabric and Quilt | 26.1–26.2 | Fabric API |
+| `e4steam-fabric-<version>-modern.jar` | Fabric and Quilt | 26.1–26.2; 26.3 Snapshot 7 | Fabric API |
 | `e4steam-forge-<version>.jar` | Forge | 1.18.2–1.20.2 | None |
 | `e4steam-neoforge-<version>.jar` | NeoForge | 1.20.2–26.2 | None |
 

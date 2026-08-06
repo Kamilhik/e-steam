@@ -12,6 +12,11 @@ belong to this fork and are independent of upstream e4mc releases.
   is now accessed through the version-compatibility layer, which uses
   `Gui#screen()`/`Gui#setScreen()` on 26.2 and the classic `Minecraft.screen`
   field everywhere else.
+- Added experimental Fabric support for Minecraft 26.3 Snapshot 7. The modern
+  artifact recognizes snapshot version names, resolves the renamed client
+  disconnect method, and places the Steam access selector inside the new
+  scrollable `WorldOptionsScreen` multiplayer layout. Its metadata retains
+  26.1–26.2 support and accepts Fabric Loader's `26.3-alpha.7` identifier.
 
 ### Русский
 
@@ -20,6 +25,11 @@ belong to this fork and are independent of upstream e4mc releases.
   Текущий экран теперь читается через слой версионной совместимости:
   на 26.2 используется `Gui#screen()`/`Gui#setScreen()`, на остальных версиях —
   прежнее поле `Minecraft.screen`.
+- Добавлена экспериментальная поддержка Fabric для Minecraft 26.3 Snapshot 7.
+  Современный JAR распознаёт имена снапшотов, учитывает переименованный метод
+  отключения клиента и размещает выбор доступа Steam внутри новой
+  прокручиваемой сетевой секции `WorldOptionsScreen`. Метаданные сохраняют
+  поддержку 26.1–26.2 и принимают внутреннюю версию Fabric `26.3-alpha.7`.
 
 ## 0.2.2 - 2026-08-05
 

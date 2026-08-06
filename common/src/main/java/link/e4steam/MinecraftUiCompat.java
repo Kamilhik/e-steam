@@ -37,6 +37,7 @@ public final class MinecraftUiCompat {
 
     private static final String[] DISCONNECT_METHOD_NAMES = {
             "disconnect",
+            "clearClientLevel",
             "clearLevel",
             "method_18099",
             "method_18096",

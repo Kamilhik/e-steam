@@ -9,10 +9,14 @@ import java.util.regex.Pattern;
 /** Resolves the running game version without binding to one WorldVersion API. */
 public final class MinecraftVersion {
     private static final Pattern RELEASE_NAME = Pattern.compile(
-            "^(?:1\\.\\d+(?:\\.\\d+)?|\\d{2}\\.\\d+(?:\\.\\d+)?)$"
+            "^(?:1\\.\\d+(?:\\.\\d+)?|\\d{2}\\.\\d+(?:\\.\\d+)?(?:-(?:snapshot|pre|rc)-\\d+)?)$"
     );
 
     private MinecraftVersion() {
+    }
+
+    static boolean isReleaseName(String value) {
+        return value != null && RELEASE_NAME.matcher(value).matches();
     }
 
     public static String current() {
@@ -48,7 +52,7 @@ public final class MinecraftVersion {
             }
             try {
                 Object value = method.invoke(version);
-                if (value instanceof String text && RELEASE_NAME.matcher(text).matches()) {
+                if (value instanceof String text && isReleaseName(text)) {
                     return text;
                 }
             } catch (ReflectiveOperationException | RuntimeException ignored) {

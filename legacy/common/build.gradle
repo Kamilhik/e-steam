@@ -5,6 +5,7 @@ architectury {
 sourceSets {
     main {
         java.srcDir("../../common/src/main/java")
+        java.exclude("link/e4steam/mixin/WorldOptionsScreenMixin.java")
         resources.setSrcDirs(["src/main/resources"])
     }
     test {
