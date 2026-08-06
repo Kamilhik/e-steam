@@ -38,8 +38,8 @@ class SteamUdpBridge private constructor(
         }
         val thread = Thread(
             { readLoop() },
-            "e4steam-steam-udp-" + Long.toUnsignedString(owner.remoteSteamId())
-                + "-" + Integer.toUnsignedString(owner.connectionId())
+            "e4steam-steam-udp-" + java.lang.Long.toUnsignedString(owner.remoteSteamId()) +
+                "-" + Integer.toUnsignedString(owner.connectionId())
         )
         thread.isDaemon = true
         readerThread = thread

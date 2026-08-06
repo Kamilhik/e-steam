@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /** Creates the temporary loopback endpoint used by an unmodified Minecraft client connection. */
 class SteamClientBridge private constructor() {
-    private class PendingAccept(private var activity: SteamRuntime.Activity) {
+    private class PendingAccept(private var activity: SteamRuntime.Activity?) {
         private var listener: ServerSocket? = null
         private var cancelled = false
 
@@ -133,10 +133,11 @@ class SteamClientBridge private constructor() {
             var activity: SteamRuntime.Activity? = null
             var handedOff = false
             try {
-                listener.use { it ->
-                    socket = it.accept()
-                    it.tcpNoDelay = true
-                    it.keepAlive = true
+                listener.use { listener ->
+                    val accepted = listener.accept()
+                    socket = accepted
+                    accepted.tcpNoDelay = true
+                    accepted.keepAlive = true
 
                     activity = pending.takeActivityForHandoff()
                     PENDING_ACCEPTS.remove(pending)
@@ -154,7 +155,7 @@ class SteamClientBridge private constructor() {
                     handedOff = true
                     E4steamClient.LOGGER.info(
                         "Opened a local Minecraft bridge to Steam user {}",
-                        Long.toUnsignedString(address.steamId())
+                        java.lang.Long.toUnsignedString(address.steamId())
                     )
                 }
             } catch (exception: SocketTimeoutException) {
