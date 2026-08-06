@@ -1,6 +1,7 @@
 package link.e4steam.mixin;
 
 import link.e4steam.E4steamClient;
+import link.e4steam.MinecraftUiCompat;
 import link.e4steam.steam.SteamAddress;
 import link.e4steam.steam.SteamClientBridge;
 import net.minecraft.client.Minecraft;
@@ -35,7 +36,7 @@ public class ServerNameResolverMixin {
             // Server-list pings also use this resolver. Only stop Spacewar
             // while Minecraft is actually on its connection screen.
             Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.screen instanceof ConnectScreen) {
+            if (MinecraftUiCompat.currentScreen(minecraft) instanceof ConnectScreen) {
                 E4steamClient.stopSteamForDirectServerConnection();
             }
             return instance.resolve(serverAddress);

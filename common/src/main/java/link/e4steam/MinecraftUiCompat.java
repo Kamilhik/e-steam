@@ -127,6 +127,59 @@ public final class MinecraftUiCompat {
     }
 
     /**
+     * Reads the active screen across the Minecraft 26.x move from
+     * {@code Minecraft.screen} to {@code Minecraft.gui.screen()}.
+     */
+    public static Screen currentScreen(Minecraft minecraft) {
+        try {
+            return minecraft.screen;
+        } catch (NoSuchFieldError ignored) {
+            try {
+                Method getter = minecraft.gui.getClass().getMethod("screen");
+                return (Screen) getter.invoke(minecraft.gui);
+            } catch (ReflectiveOperationException failure) {
+                throw new IllegalStateException("No compatible current-screen accessor was found", failure);
+            }
+        }
+    }
+
+    /** Opens a screen across the Minecraft 26.x setScreenAndShow rename. */
+    public static void setScreen(Minecraft minecraft, Screen screen) {
+        try {
+            minecraft.setScreen(screen);
+        } catch (NoSuchMethodError ignored) {
+            try {
+                Method setter = minecraft.getClass().getMethod("setScreenAndShow", Screen.class);
+                setter.invoke(minecraft, screen);
+            } catch (ReflectiveOperationException failure) {
+                throw new IllegalStateException("No compatible screen setter was found", failure);
+            }
+        }
+    }
+
+    /** Adds a chat message after Minecraft 26.x moved chat from Gui to Hud. */
+    public static void addChatMessage(Minecraft minecraft, Component message) {
+        try {
+            minecraft.gui.getChat().addMessage(message);
+        } catch (NoSuchMethodError ignored) {
+            try {
+                Object hud = minecraft.gui.getClass().getField("hud").get(minecraft.gui);
+                Object chat = hud.getClass().getMethod("getChat").invoke(hud);
+                Method addMessage = Arrays.stream(chat.getClass().getMethods())
+                        .filter(method -> method.getName().equals("addClientSystemMessage")
+                                || method.getName().equals("addMessage"))
+                        .filter(method -> method.getParameterCount() == 1)
+                        .filter(method -> method.getParameterTypes()[0].isAssignableFrom(message.getClass()))
+                        .findFirst()
+                        .orElseThrow(() -> new NoSuchMethodException("ChatComponent system-message method"));
+                addMessage.invoke(chat, message);
+            } catch (ReflectiveOperationException failure) {
+                throw new IllegalStateException("No compatible chat message API was found", failure);
+            }
+        }
+    }
+
+    /**
      * Starts Minecraft's normal connection screen across its old four-argument
      * and newer five-/six-argument signatures.
      */

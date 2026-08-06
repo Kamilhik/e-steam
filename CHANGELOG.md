@@ -3,6 +3,26 @@
 All notable changes to e4steam are documented here. Version numbers below
 belong to this fork and are independent of upstream e4mc releases.
 
+## 0.2.3 - 2026-08-06
+
+### English
+
+- Fixed the Forge 1.20.1 startup crash when another mod also bundles Kaleido
+  Config. e4steam now isolates its private Kaleido runtime in every JAR.
+- Fixed the Minecraft 26.2 crash when accepting a Steam invitation after the
+  active screen and chat APIs moved from `Minecraft` to `Gui` and `Hud`.
+- Replaced the full Java stack trace printed by `/e4steam doctor` in chat with
+  a short diagnosis. Full technical details remain available in `latest.log`.
+
+### Русский
+
+- Исправлен вылет Forge 1.20.1 при запуске вместе с другим модом, который тоже
+  включает Kaleido Config. Теперь e4steam изолирует свою копию Kaleido во всех JAR.
+- Исправлен вылет Minecraft 26.2 при принятии приглашения Steam после переноса
+  API активного экрана и чата из `Minecraft` в `Gui` и `Hud`.
+- Вместо полного Java-стектрейса команда `/e4steam doctor` теперь показывает в
+  чате краткую причину. Полная техническая информация сохраняется в `latest.log`.
+
 ## 0.2.2 - 2026-08-05
 
 ### English

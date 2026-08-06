@@ -1,7 +1,6 @@
 package link.e4steam;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -289,26 +288,9 @@ public class Mirror {
                 return;
             }
             try {
-                Minecraft.getInstance().gui.getChat().addMessage(message);
-            } catch (NoSuchMethodError e) {
-                ChatComponent chat;
-                try {
-                    chat = Minecraft.getInstance().gui.getChat();
-                } catch (NoSuchMethodError ex) {
-                    try {
-                        var gui = Minecraft.getInstance().gui;
-                        var hud = gui.getClass().getField("hud").get(gui);
-                        chat = (ChatComponent) hud.getClass().getMethod("getChat").invoke(hud);
-                    } catch (Throwable exc) {
-                        E4steamClient.LOGGER.error("Failed to get client chat!");
-                        return;
-                    }
-                }
-                try {
-                    chat.getClass().getMethod("addClientSystemMessage", Component.class).invoke(chat, message);
-                } catch (Exception ex) {
-                    E4steamClient.LOGGER.error("Failed to add message to client chat!");
-                }
+                MinecraftUiCompat.addChatMessage(Minecraft.getInstance(), message);
+            } catch (RuntimeException failure) {
+                E4steamClient.LOGGER.error("Failed to add message to client chat", failure);
             }
         });
     }

@@ -47,6 +47,8 @@ processResources {
 }
 
 shadowJar {
+    relocate "folk.sisby.kaleido", "link.e4steam.internal.kaleido"
+
     exclude("fabric.mod.json")
     exclude("architectury.common.json")
     exclude("steam_api.dll")

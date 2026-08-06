@@ -3,6 +3,7 @@ package link.e4steam.mixin;
 import link.e4steam.E4steamClient;
 import link.e4steam.MinecraftUiCompat;
 import link.e4steam.Mirror;
+import link.e4steam.MinecraftUiCompat;
 import link.e4steam.steam.SteamSession;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
@@ -71,7 +72,7 @@ public abstract class PauseScreenMixin extends Screen {
                         cause = cause.getCause();
                     }
                     E4steamClient.LOGGER.warn("Could not open the Steam invitation overlay", cause);
-                    minecraft.gui.getChat().addMessage(
+                    MinecraftUiCompat.addChatMessage(minecraft,
                             Mirror.translatable("text.e4steam_minecraft.overlayUnavailable")
                     );
                 }

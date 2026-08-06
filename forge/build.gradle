@@ -42,6 +42,10 @@ processResources {
 }
 
 shadowJar {
+    // Keep e4steam's private Kaleido copy isolated from other mods that bundle
+    // the same library. Duplicate packages are fatal on Forge's module layer.
+    relocate "folk.sisby.kaleido", "link.e4steam.internal.kaleido"
+
     exclude "fabric.mod.json"
     exclude "architectury.common.json"
     exclude "steam_api.dll"

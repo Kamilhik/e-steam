@@ -235,6 +235,15 @@ tasks.register("releaseJars") {
                     throw new GradleException("${variant.label} is missing the e4steam mod icon")
                 }
 
+                if (zip.getEntry("folk/sisby/kaleido/api/KaleidoConfig.class") != null) {
+                    throw new GradleException(
+                            "${variant.label} exposes an unrelocated Kaleido copy that can conflict with other mods"
+                    )
+                }
+                if (zip.getEntry("link/e4steam/internal/kaleido/api/KaleidoConfig.class") == null) {
+                    throw new GradleException("${variant.label} is missing its isolated Kaleido runtime")
+                }
+
                 def classEntry = zip.getEntry("link/e4steam/steam/SteamAddress.class")
                 if (classEntry == null) {
                     throw new GradleException("${variant.label} is missing SteamAddress.class")
