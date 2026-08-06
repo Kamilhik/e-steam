@@ -19,7 +19,11 @@ import java.util.function.LongConsumer
 /** Steam lobby, friends, overlay and invite state. Called only by the Steam worker. */
 class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
     private val minecraftVersion = MinecraftVersion.current()
-    private val friends = SteamFriends(object : SteamFriendsCallback {
+    private lateinit var friends: SteamFriends
+    private lateinit var matchmaking: SteamMatchmaking
+
+    init {
+        friends = SteamFriends(object : SteamFriendsCallback {
         override fun onGameLobbyJoinRequested(lobby: SteamID, friend: SteamID) {
             requestJoin(lobby, friend)
         }
@@ -46,8 +50,8 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
                 E4steamClient.LOGGER.debug("Ignored an invalid Steam rich-presence join string")
             }
         }
-    })
-    private val matchmaking = SteamMatchmaking(object : SteamMatchmakingCallback {
+        })
+        matchmaking = SteamMatchmaking(object : SteamMatchmakingCallback {
         override fun onLobbyCreated(result: SteamResult, lobby: SteamID) {
             handleLobbyCreated(result, lobby)
         }
@@ -100,7 +104,8 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
                 loseGuestLobby()
             }
         }
-    })
+        })
+    }
 
     private var pendingHostOwner: SteamSession? = null
     private var pendingHostAccessMode: SteamAccessMode? = null
@@ -170,7 +175,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
             result!!.completeExceptionally(IOException("Steam hosting was stopped"))
         }
         if (hostLobbyOwner == owner) {
-            if (hostLobbyId != 0) {
+            if (hostLobbyId != 0L) {
                 val lobby = SteamID.createFromNativeHandle(hostLobbyId)
                 matchmaking.setLobbyJoinable(lobby, false)
                 matchmaking.leaveLobby(lobby)
@@ -186,7 +191,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
             throw IOException("Steam lobby is not ready")
         }
         requireOverlay()
-        if (hostLobbyId == 0) {
+        if (hostLobbyId == 0L) {
             openFriendsOverlayCompat()
             return
         }
@@ -207,18 +212,18 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
     }
 
     fun mayAcceptPeer(remoteSteamId: Long): Boolean {
-        if (guestLobbyId != 0 && guestHostSteamId == remoteSteamId) {
+        if (guestLobbyId != 0L && guestHostSteamId == remoteSteamId) {
             return true
         }
         return hostLobbyOwner != null && isAllowedHostPeer(remoteSteamId)
     }
 
     fun forEachKnownSessionPeer(consumer: LongConsumer) {
-        if (guestLobbyId != 0 && guestHostSteamId != 0) {
+        if (guestLobbyId != 0L && guestHostSteamId != 0L) {
             consumer.accept(guestHostSteamId)
         }
 
-        if (hostLobbyOwner == null || hostLobbyId == 0) {
+        if (hostLobbyOwner == null || hostLobbyId == 0L) {
             return
         }
         val lobbyId = SteamID.createFromNativeHandle(hostLobbyId)
@@ -229,7 +234,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
                 continue
             }
             val remoteSteamId = SteamNativeHandle.getNativeHandle(member)
-            if (remoteSteamId != 0
+            if (remoteSteamId != 0L
                     && remoteSteamId != runtime.steamIdValue()
                     && friends.getFriendRelationship(member) == SteamFriends.FriendRelationship.Friend) {
                 consumer.accept(remoteSteamId)
@@ -241,18 +246,18 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
         return (pendingHostOwner != null && !pendingHostCanceled)
                 || queuedHostOwner != null
                 || hostLobbyOwner != null
-                || guestLobbyId != 0
-                || requestedLobbyId != 0
+                || guestLobbyId != 0L
+                || requestedLobbyId != 0L
     }
 
     fun clientBridgeOpened(remoteSteamId: Long) {
-        if (guestLobbyId != 0 && guestHostSteamId == remoteSteamId) {
+        if (guestLobbyId != 0L && guestHostSteamId == remoteSteamId) {
             guestJoinState!!.connected()
         }
     }
 
     fun clientBridgeClosed(remoteSteamId: Long, anotherBridgeExists: Boolean) {
-        if (guestLobbyId != 0 && guestHostSteamId == remoteSteamId && !anotherBridgeExists) {
+        if (guestLobbyId != 0L && guestHostSteamId == remoteSteamId && !anotherBridgeExists) {
             leaveGuestLobby()
         }
     }
@@ -262,7 +267,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
     }
 
     fun claimGuestInvite(endpoint: String?): Boolean {
-        if (guestLobbyId == 0
+        if (guestLobbyId == 0L
                 || endpoint == null
                 || !endpoint.equals(guestEndpoint)
                 || !guestJoinState!!.claim()) {
@@ -272,7 +277,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
     }
 
     fun beginGuestConnect(endpoint: String?): Boolean {
-        if (guestLobbyId != 0
+        if (guestLobbyId != 0L
                 && endpoint != null
                 && endpoint.equals(guestEndpoint)) {
             return guestJoinState!!.beginConnect(
@@ -283,12 +288,12 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
     }
 
     fun cleanup(now: Long) {
-        if (requestedLobbyId != 0 && requestedJoinDeadlineMillis <= now) {
+        if (requestedLobbyId != 0L && requestedJoinDeadlineMillis <= now) {
             leaveGuestLobby()
             E4steamClient.showSteamJoinFailure(Mirror.translatable("text.e4steam_minecraft.joinLobbyTimeout"))
             return
         }
-        if (guestLobbyId != 0 && guestJoinState!!.expired(now)) {
+        if (guestLobbyId != 0L && guestJoinState!!.expired(now)) {
             if (runtime.hasClientBridgeForRemote(guestHostSteamId)) {
                 guestJoinState!!.connected()
                 return
@@ -308,13 +313,13 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
         clearPendingHost()
         val lobbyId = SteamNativeHandle.getNativeHandle(lobby)
         if (owner == null) {
-            if (lobbyId != 0) {
+            if (lobbyId != 0L) {
                 matchmaking.leaveLobby(lobby)
             }
             return
         }
         if (canceled) {
-            if (lobbyId != 0) {
+            if (lobbyId != 0L) {
                 matchmaking.leaveLobby(lobby)
             }
             issueQueuedHostCreate()
@@ -327,10 +332,10 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
                     attempts + 1,
                     HOST_LOBBY_MAX_ATTEMPTS
             )
-            issueHostCreate(owner, accessMode, address, hostResult, attempts)
+            issueHostCreate(owner, accessMode!!, address!!, hostResult!!, attempts)
             return
         }
-        if (result != SteamResult.OK || lobbyId == 0) {
+        if (result != SteamResult.OK || lobbyId == 0L) {
             if (!hostResult!!.isDone) {
                 hostResult.completeExceptionally(IOException("Steam lobby creation failed: $result"))
             } else {
@@ -484,7 +489,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
 
     private fun requestJoin(lobby: SteamID, friend: SteamID) {
         val lobbyId = SteamNativeHandle.getNativeHandle(lobby)
-        if (lobbyId == 0 || (hostLobbyOwner != null && hostLobbyId == lobbyId)) {
+        if (lobbyId == 0L || (hostLobbyOwner != null && hostLobbyId == lobbyId)) {
             return
         }
         if (canceledJoinLobbyIds.contains(lobbyId)) {
@@ -494,14 +499,14 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
         if (requestedLobbyId == lobbyId || guestLobbyId == lobbyId) {
             return
         }
-        if (guestLobbyId != 0
+        if (guestLobbyId != 0L
                 && (guestEndpoint != null
                 || guestJoinState!!.isConnected()
                 || runtime.hasClientBridgeForRemote(guestHostSteamId))) {
             E4steamClient.showSteamJoinFailure(Mirror.translatable("text.e4steam_minecraft.joinCurrentSession"))
             return
         }
-        if (guestLobbyId != 0 || requestedLobbyId != 0) {
+        if (guestLobbyId != 0L || requestedLobbyId != 0L) {
             leaveGuestLobby()
         }
         requestedLobbyId = lobbyId
@@ -542,7 +547,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
 
         val owner = matchmaking.getLobbyOwner(lobby)
         val ownerId = if (owner == null) 0 else SteamNativeHandle.getNativeHandle(owner)
-        if (ownerId == 0
+        if (ownerId == 0L
                 || ownerId == runtime.steamIdValue()
                 || friends.getFriendRelationship(owner) != SteamFriends.FriendRelationship.Friend) {
             matchmaking.leaveLobby(lobby)
@@ -560,7 +565,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
     }
 
     private fun resolveGuestEndpoint() {
-        if (guestLobbyId == 0 || guestEndpoint != null) {
+        if (guestLobbyId == 0L || guestEndpoint != null) {
             return
         }
         val lobby = SteamID.createFromNativeHandle(guestLobbyId)
@@ -636,7 +641,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
     }
 
     private fun loseGuestLobby() {
-        if (guestLobbyId == 0) {
+        if (guestLobbyId == 0L) {
             return
         }
         guestJoinState!!.loseLobby()
@@ -653,10 +658,10 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
         requestedLobbyId = 0
         requestedFriendId = 0
         requestedJoinDeadlineMillis = 0
-        if (currentLobbyId != 0) {
+        if (currentLobbyId != 0L) {
             currentJoinState!!.cancel()
             matchmaking.leaveLobby(SteamID.createFromNativeHandle(currentLobbyId))
-        } else if (requested != 0) {
+        } else if (requested != 0L) {
             // LobbyEnter does not identify the JoinLobby API call. Preserve a
             // tombstone so a late callback cannot be accepted as a later
             // retry for the same lobby in this Steam runtime generation.
@@ -679,7 +684,7 @@ class SteamLobbyManager(private val runtime: SteamRuntime) : AutoCloseable {
             queuedResult!!.completeExceptionally(IOException("Steam runtime stopped before creating the lobby"))
         }
         if (hostLobbyOwner != null) {
-            if (hostLobbyId != 0) {
+            if (hostLobbyId != 0L) {
                 val lobby = SteamID.createFromNativeHandle(hostLobbyId)
                 matchmaking.setLobbyJoinable(lobby, false)
                 matchmaking.leaveLobby(lobby)

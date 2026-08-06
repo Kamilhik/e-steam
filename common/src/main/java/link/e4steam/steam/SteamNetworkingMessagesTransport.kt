@@ -71,7 +71,7 @@ class SteamNetworkingMessagesTransport(
         if (data == null) {
             throw IOException("Could not access the direct Steam send buffer")
         }
-        data = data.share(payload.position())
+        data = data.share(payload.position().toLong())
         val flags = if (unreliable) SEND_UNRELIABLE_NO_DELAY else SEND_RELIABLE_NO_NAGLE
         return nativeAccess.send(identity(remoteSteamId), data, size, flags, channel)
     }
@@ -123,7 +123,7 @@ class SteamNetworkingMessagesTransport(
                 throw IOException("Steam returned a null message payload")
             }
             if (size > 0) {
-                target.put(data!!.getByteBuffer(0, size))
+                target.put(data!!.getByteBuffer(0, size.toLong()))
             }
             return Received(readSteamId(message.share(MESSAGE_IDENTITY_OFFSET)), size)
         } finally {
@@ -180,7 +180,7 @@ class SteamNetworkingMessagesTransport(
             return
         }
         val remoteSteamId = readSteamId(request)
-        if (remoteSteamId != 0) {
+        if (remoteSteamId != 0L) {
             try {
                 listener.onSessionRequest(remoteSteamId)
             } catch (throwable: Throwable) {
@@ -194,7 +194,7 @@ class SteamNetworkingMessagesTransport(
             return
         }
         val remoteSteamId = readSteamId(failure)
-        if (remoteSteamId == 0) {
+        if (remoteSteamId == 0L) {
             return
         }
         val endReason = failure.getInt(CONNECTION_INFO_END_REASON_OFFSET)
@@ -210,7 +210,7 @@ class SteamNetworkingMessagesTransport(
         if (message == null || message.isBlank()) {
             return
         }
-        val clean = message.strip()
+        val clean = message.trim()
         if (type <= 2) {
             E4steamClient.LOGGER.warn("Steam Networking Sockets: {}", clean)
         } else {
@@ -281,7 +281,7 @@ class SteamNetworkingMessagesTransport(
 
     companion object {
         private const val STEAM_IDENTITY_TYPE = 16
-        private const val STEAM_IDENTITY_SIZE = 136
+        private const val STEAM_IDENTITY_SIZE = 136L
         private const val STEAM_IDENTITY_VALUE_SIZE = java.lang.Long.BYTES
 
         private const val RESULT_OK = 1
