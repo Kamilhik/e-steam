@@ -63,8 +63,9 @@ object Doctor {
             result.append("state: ").append(session.state).append("\n")
             result.append("local port: ").append(session.localPort()).append("\n")
             result.append("recorded exception:\n")
-            if (session.failureCause != null) {
-                appendThrowable(result, session.failureCause)
+            val sessionFailure = session.failureCause
+            if (sessionFailure != null) {
+                appendThrowable(result, sessionFailure)
             } else {
                 result.append("none recorded.\n")
             }
