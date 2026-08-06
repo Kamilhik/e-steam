@@ -22,11 +22,10 @@ class SteamAddress internal constructor(steamId: Long, token: ByteArray) {
 
     fun token(): ByteArray = tokenValue.clone()
 
-    fun inviteString(): String = "s-"
-            + java.lang.Long.toUnsignedString(steamIdValue, Character.MAX_RADIX)
-            + "-"
-            + BigInteger(1, tokenValue).toString(Character.MAX_RADIX)
-            + ".steam"
+    fun inviteString(): String =
+            "s-" + java.lang.Long.toUnsignedString(steamIdValue, Character.MAX_RADIX) +
+            "-" + BigInteger(1, tokenValue).toString(Character.MAX_RADIX) +
+            ".steam"
 
     override fun toString(): String =
             "SteamAddress{steamId=" + java.lang.Long.toUnsignedString(steamIdValue) + ", token=<redacted>}"
@@ -99,7 +98,7 @@ class SteamAddress internal constructor(steamId: Long, token: ByteArray) {
 
         private fun decodeBase36Token(encoded: String): ByteArray {
             val value = BigInteger(encoded, Character.MAX_RADIX)
-            if (value.signum() < 0 || value.bitLength() > TOKEN_LENGTH * Byte.SIZE) {
+            if (value.signum() < 0 || value.bitLength() > TOKEN_LENGTH * java.lang.Byte.SIZE) {
                 throw IllegalArgumentException("Steam invite token exceeds 128 bits")
             }
 
