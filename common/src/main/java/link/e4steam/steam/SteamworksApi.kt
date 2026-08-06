@@ -6,8 +6,8 @@ import com.codedisaster.steamworks.SteamAPI
 class SteamworksApi : SteamApi {
     override fun loadLibraries(loader: SteamNativeLibraryLoader): Boolean = SteamAPI.loadLibraries(loader)
 
-    @JvmName("init")
-    override fun initialize(): Boolean = SteamAPI.init()
+    @Throws(Exception::class)
+    override fun init(): Boolean = SteamAPI.init()
 
     override fun isSteamRunning(): Boolean = SteamAPI.isSteamRunning(true)
 

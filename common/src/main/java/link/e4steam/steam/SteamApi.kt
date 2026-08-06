@@ -4,9 +4,8 @@ package link.e4steam.steam
 interface SteamApi {
     fun loadLibraries(loader: SteamNativeLibraryLoader): Boolean
 
-    @JvmName("init")
     @Throws(Exception::class)
-    fun initialize(): Boolean
+    fun init(): Boolean
 
     fun isSteamRunning(): Boolean
 

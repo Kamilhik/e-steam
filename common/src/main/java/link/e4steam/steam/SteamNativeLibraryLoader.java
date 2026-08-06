@@ -19,7 +19,7 @@ import java.util.Map;
  * class loader. Mod loaders such as NeoForge isolate mod resources, so LWJGL
  * cannot reliably discover native files bundled at the root of the mod JAR.
  */
-final class SteamNativeLibraryLoader implements SteamLibraryLoader {
+public final class SteamNativeLibraryLoader implements SteamLibraryLoader {
     private static final String CACHE_DIRECTORY = "e4steam-steam-natives";
 
     private final Map<String, Path> libraries;
